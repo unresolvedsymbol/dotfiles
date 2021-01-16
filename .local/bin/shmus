@@ -1,0 +1,669 @@
+#!/usr/bin/env bash
+
+# Shoutout to the guy that sent me this script on the nixnest Discord
+
+unset -- IFS APLAY
+NAME="${0##*/}"
+
+NTLIST="$HOME/.local/share/$NAME/ntlist" # Next track list
+PTLIST="$HOME/.local/share/$NAME/ptlist" # Previous track list
+TPID="$HOME/.cache/$NAME/track" # Pidfile for the playing track
+HPID="$HOME/.cache/$NAME/handler" # Pidfile for the script handling
+
+error () { printf "%s\n" "$NAME: ERROR: $1" >&2; }
+
+checkpath () {
+	unset -- FILE
+	if [ "$1" = "file" ]; then
+		FILE=true
+	elif [ "$1" != "dir" ]; then
+		error "Missing argument"
+		exit 1
+	fi
+
+	shift
+	while [ $# -gt 0 ]; do
+		DIR="$1"
+		[ "$FILE" ] && DIR="${DIR%/*}"
+
+		if [ ! -d "$DIR" ]; then
+			mkdir -p -- "$DIR" || exit 1
+		elif [ ! -w "$DIR" ] || [ ! -x "$DIR" ]; then
+			error "Can't write to directory '$DIR'"
+			exit 1
+		fi
+
+		if [ "$FILE" ]; then
+			if [ ! -w "$1" ]; then
+				touch -- "$1" || exit 1
+			elif [ ! -O "$1" ]; then
+				error "File '$1' is owned by someone else"
+				exit 1
+			fi
+		fi
+		shift
+	done
+	unset -- FILE DIR
+}
+
+installed () {
+	COMMAND="$1"
+	IFS=":"
+	set -- $PATH
+	while [ $# -gt 0 ]; do
+		if [ -x "$1/$COMMAND" ]; then
+			unset -- IFS COMMAND
+			return 0
+		fi
+		shift
+	done
+	unset -- IFS COMMAND
+	return 1
+}
+
+help () {
+printf "%s" "$NAME - A minimalist file-based music player daemon.
+
+Usage: $NAME [-q] [-r N] [--raw] [--current] [OPTION]
+
+Available options:
+
+	start		Launch $NAME
+	list		DIsplay the queue
+	queue [FILE]	Queue files/playlists
+	random [NUMBER]	Queue N random files from current directory and below
+	track [NUMBER]	Play track N (number available on 'list')
+	previous	Play previous track
+	next		Play next track
+	pause		Pause track
+	resume		Resume track
+	reset		Update the queue
+	edit		Open the queue with \$EDITOR
+	clear		Clean the queue
+	stop		Exit $NAME
+	codec [FILE]	Test if the codec works (useful for debugging)
+	-q		Supress warnings
+	-r [NUMBER]	Repeat queue commands N times
+	--raw		Display raw queue on 'list' command
+	--current	Display currently playing track on 'list' command
+"
+}
+
+codec () {
+	if [ ! -f "$1" ]; then
+		return 0
+	fi
+
+	unset -- NOCODEC
+	case "${1##*.}" in
+		wav)
+			aplay -f cd --process-id-file "$TPID" "$1" ||
+			return 1
+			;;
+		flac)
+			if [ "$FLAC" ]; then
+				flac -dc "$1" | aplay -f cd --process-id-file "$TPID" ||
+				return 1
+			else
+				NOCODEC=true
+			fi
+			;;
+		opus)
+			if [ "$OPUS" ]; then
+				opusdec --rate 44100 "$1" - | aplay -f cd --process-id-file "$TPID" ||
+				return 1
+			else
+				NOCODEC=true
+			fi
+			;;
+		wv)
+			if [ "$WAVPACK" ]; then
+				wvunpack "$1" -o - | aplay -f cd --process-id-file "$TPID" ||
+				return 1
+			else
+				NOCODEC=true
+			fi
+			;;
+		tta)
+			if [ "$TTA" ]; then
+				ttaenc -d "$1" -o - | aplay -f cd --process-id-file "$TPID" ||
+				return 1
+			else
+				NOCODEC=true
+			fi
+			;;
+		ogg)
+			if [ "$OGG" ]; then
+				oggdec -Q "$1" -o - | aplay -f cd --process-id-file "$TPID" ||
+				return 1
+			else
+				NOCODEC=true
+			fi
+			;;
+		aac)
+			if [ "$AAC" ]; then
+				faad "$1"-o - | aplay -f cd --process-id-file "$TPID" ||
+				return 1
+			else
+				NOCODEC=true
+			fi
+			;;
+		mpc)
+			if [ "$MPC" ]; then
+				mpcdec "$1" - | aplay -f cd --process-id-file "$TPID" ||
+				return 1
+			else
+				NOCODEC=true
+			fi
+			;;
+		mp3)
+			if [ "$MP3" ]; then
+				lame --decode "$1" - | aplay -f cd --process-id-file "$TPID" ||
+				return 1
+			else
+				NOCODEC=true
+			fi
+			;;
+		m4a|wma)
+			NOCODEC=true
+			;;
+	esac
+
+	if [ "$NOCODEC" ] && [ "$FFMPEG" ]; then
+		ffmpeg -i "$1" -ar 44100 -f wav - | aplay -f cd --process-id-file "$TPID" ||
+		return 1
+	fi
+}
+
+checkcodec () {
+	if [ ! "$2" ] && [ ! "$FFMPEG" ]; then
+		if [ ! "$QUIET" ]; then
+			[ "$3" ] && [ "$4" ] &&
+			set -- "$1" "$2" " '$3'" "'$4' or"
+			printf "%s\n" "$NAME: WARNING: Skipping '${1##*/}':$3 codec not found, please install $4'ffmpeg'" >&2
+		fi
+		return 1
+	fi
+	[ "${1%%/*}" ] &&
+	set -- "$PWD/$1"
+	if [ ! "$QUEUE" ]; then
+		QUEUE="$1"
+	else
+		QUEUE="$QUEUE
+$1"
+	fi
+}
+
+checkplaylist () {
+	while read LINE; do
+		[ "$MUSICPATH" ] && [ "${LINE%%/*}" ] && LINE="$MUSICPATH/$LINE"
+		set -- "$@" "$LINE"
+	done < "$1"
+	shift
+	queueparse "$@"
+}
+
+queueparse () {
+	while [ $# -gt 0 ]; do
+		if [ ! -f "$1" ]; then
+			if [ ! "$QUIET" ]; then
+				printf "%s\n" "$NAME: WARNING: Skipping '${1##*/}': file does not exist" >&2
+			fi
+		else
+			case "${1##*.}" in
+				wav)
+					checkcodec "$1" "true" ;;
+				flac)
+					checkcodec "$1" "$FLAC" "flac" "flac" ;;
+				opus)
+					checkcodec "$1" "$OPUS" "opus" "opusdec" ;;
+				wv)
+					checkcodec "$1" "$WAVPACK" "wavpack" "wvunpack" ;;
+				tta)
+					checkcodec "$1" "$TTA" "tta" "ttaenc" ;;
+				ogg)
+					checkcodec "$1" "$OGG" "ogg" "oggdec" ;;
+				aac)
+					checkcodec "$1" "$AAC" "aac" "faad" ;;
+				mpc)
+					checkcodec "$1" "$MPC" "mpc" "mpcdec" ;;
+				mp3)
+					checkcodec "$1" "$MP3" "mp3" "lame" ;;
+				m4a|wma)
+					checkcodec "$1" ;;
+				m3u)
+					checkplaylist "$1" ;;
+				png|jpg|jpeg)
+					;;
+				*)
+					if [ ! "$QUIET" ]; then
+						printf "%s\n" "$NAME: WARNING: Skipping '${1##*/}': not recognized as an audio file, maybe change the file extension?\n" >&2
+					fi
+					;;
+			esac
+		fi
+		shift
+	done
+}
+
+queue () {
+	unset -- QUEUE
+	queueparse "$@"
+	[ "$QUEUE" ] &&
+	printf "%s\n" "$QUEUE" >> "$NTLIST"
+	unset -- QUEUE
+	if ! alive "$TPID"; then
+		start
+	fi
+}
+
+alive () {
+	[ -s "$1" ] &&
+	read PID < "$1" &&
+	[ -O "/proc/$PID" ]
+}
+
+
+interrupt () {
+	reset
+	printf "" > "$HPID"
+	exit 1
+}
+
+main () {
+	trap "interrupt" 2 3 6 15
+	IFS="
+"
+	while read LINE; do
+		set -- "$@" $LINE
+	done < "$NTLIST"
+	while [ "$1" ]; do
+		codec "$1" >/dev/null 2>&1
+		e=$?
+		CURRENT="$1"
+		set --
+		while read LINE; do
+			set -- "$@" $LINE
+		done < "$NTLIST"
+		if [ $e -eq 0 ] && [ "$1" = "$CURRENT" ]; then
+			printf "%s\n" "$1" >> "$PTLIST"
+			shift
+			if [ ! $# -eq 0 ]; then
+				printf "%s\n" "$*" > "$NTLIST"
+			else
+				printf "" > "$NTLIST"
+			fi
+		fi
+	done
+	printf "" > "$HPID"
+}
+
+start () {
+	if alive "$HPID"; then
+		error "There's an instance already running!"
+		return 1
+	fi
+	main &
+	printf "%s\n" "$!" > "$HPID"
+}
+
+listraw () {
+	[ "$MUSICPATH" ] &&
+	[ ! "${LINE%%$MUSICPATH/*}" ] &&
+	LINE="${LINE#$MUSICPATH/}"
+	printf "%s\n" "$LINE"
+}
+
+listinfo () {
+	TRACK="${LINE%.*}"
+	TRACK="${TRACK##*/}"
+	ALBUM="${LINE%/*}"
+	ALBUM="${ALBUM##*/}"
+}
+
+listparse () {
+	listinfo
+	if [ "$ALBUM" != "$CURRENT" ]; then
+		printf "[1m"
+		printf "%s\n" "$ALBUM"
+		printf "[0m"
+		CURRENT="$ALBUM"
+	fi
+	if [ "$ACTIVE" ]; then
+		printf "[1m"
+		printf "[33m"
+		unset -- ACTIVE
+	fi
+	printf "%s\t%s\n" "$((i+=1))" "$TRACK"
+	printf "[0m"
+}
+
+list () {
+	unset -- ACTIVE CURRENT
+	if [ "$LIST" = "raw" ]; then
+		while read LINE; do
+			listraw
+		done < "$PTLIST"
+
+		while read LINE; do
+			listraw
+		done < "$NTLIST"
+	elif [ "$LIST" = "current" ]; then
+		read LINE < "$NTLIST"
+		listinfo
+		[ "$LINE" ] && printf "%s\n" "$TRACK | $ALBUM" || exit 1
+	else
+		i=0
+		while read LINE; do
+			listparse
+		done < "$PTLIST"
+
+		ACTIVE=true
+		while read LINE; do
+			listparse
+		done < "$NTLIST"
+	fi
+	unset -- ACTIVE CURRENT TRACK ALLBUM
+}
+
+random () {
+	IFS="
+"
+	set -- $(find -L . -type f -name "*.wav"  \
+				-o -name "*.flac" \
+				-o -name "*.opus" \
+				-o -name "*.wv"   \
+				-o -name "*.tta"  \
+				-o -name "*.ogg"  \
+				-o -name "*.aac"  \
+				-o -name "*.mpc"  \
+				-o -name "*.mp3"  \
+				-o -name "*.m4a"  \
+				-o -name "*.wma"  \
+		| shuf -n "$1" | sed 's/\.\///')
+	unset -- IFS
+	queue "$@"
+}
+
+track () {
+	unset -- QUEUE
+
+	i="$1"
+	shift
+
+	while read LINE; do
+		set -- "$@" "$LINE"
+	done < "$PTLIST"
+	[ "$i" = "previous" ] && i=$#
+	now=$(($#+1))
+	while read LINE; do
+		set -- "$@" "$LINE"
+	done < "$NTLIST"
+
+	if [ $i -gt $# ] || [ $i -eq 0 ]; then
+		error "There is no track with this number"
+		return 1
+	elif [ ! $i -eq $now ]; then
+		IFS="
+"
+		if [ $i -gt 1 ]; then
+			while [ $i -gt 1 ]; do
+				if [ ! "$QUEUE" ]; then
+					QUEUE="$1"
+				else
+					QUEUE="$QUEUE
+$1"
+				fi
+				shift
+				i=$((i-1))
+			done
+			printf "%s\n" "$QUEUE" > "$PTLIST"
+		else
+			printf "" > "$PTLIST"
+		fi
+		printf "%s\n" "$*" > "$NTLIST"
+	fi
+
+	unset -- IFS QUEUE now
+	if ! alive "$TPID"; then
+		start
+	else
+		reset
+	fi
+}
+
+previous () { [ -s "$PTLIST" ] && track previous; }
+
+next () {
+	[ ! -s "$NTLIST" ] && return 0
+	IFS="
+"
+	while read LINE; do
+		set -- "$@" $LINE
+	done < "$NTLIST"
+
+	printf "%s\n" "$1" >> "$PTLIST"
+	shift
+	if [ ! $# -eq 0 ]; then
+		printf "%s\n" "$*" > "$NTLIST"
+	else
+		printf "" > "$NTLIST"
+	fi
+
+	unset -- IFS
+	if ! alive "$TPID"; then
+		start
+	else
+		reset
+	fi
+}
+
+pause () { alive "$TPID" && kill -19 "$PID"; }
+
+resume () { alive "$TPID" && kill -18 "$PID"; }
+
+reset () { alive "$TPID" && kill -15 "$PID"; }
+
+edit () {
+	if [ ! "$EDITOR" ]; then
+		error "\$EDITOR is not set"
+		return 1
+	fi
+	read OLD < "$NTLIST"
+	$EDITOR "$PTLIST"
+	$EDITOR "$NTLIST"
+	read NEW < "$NTLIST"
+	if [ "$NEW" != "$OLD" ]; then
+		if ! alive "$TPID"; then
+			start
+		else
+			reset
+		fi
+	fi
+	unset -- OLD NEW
+}
+
+clear () {
+	printf "" > "$PTLIST"
+	printf "" > "$NTLIST"
+}
+
+stop () {
+	alive "$HPID" && kill -15 "$PID"
+	alive "$TPID" && kill -15 "$PID"
+	printf "" > "$HPID"
+}
+
+parse () {
+	unset -- FUNCTION QUIET LIST REPEAT
+
+	i=$#
+	while [ $i -gt 0 ]; do
+		case "$1" in
+			-h|--help)
+				help
+				return 0
+				;;
+			-q|--quiet)
+				QUIET=true
+				;;
+			--raw)
+				LIST="raw"
+				;;
+			--current)
+				LIST="current"
+				;;
+			-r|--repeat)
+				if [ ! "$2" ]; then
+					error "'--repeat' requires an argument to be given"
+					return 1
+				fi
+				REPEAT="$2"
+				shift
+				;;
+			-r=*|--repeat=*)
+				REPEAT="${1#*=}"
+				if [ ! "$REPEAT" ]; then
+					error "'--repeat=' requires an argument to be given"
+					return 1
+				fi
+				;;
+			--)
+				shift
+				while [ $i -gt 0 ]; do
+					set -- "$@" "$1"
+					shift
+					i=$((i-1))
+				done
+				break
+				;;
+			-*)
+				error "Unknown option '$1'"
+				return 1
+				;;
+			*)
+				if [ ! "$FUNCTION" ]; then
+					FUNCTION="$1"
+				else
+					set -- "$@" "$1"
+				fi
+				;;
+		esac
+		shift
+		i=$((i-1))
+	done
+
+	if [ "$REPEAT" ]; then
+		case "$FUNCTION" in
+			queue|random)
+				;;
+			*)
+				error "'--repeat' is not valid for '$FUNCTION'"
+				return 1
+				;;
+		esac
+		case "$REPEAT" in
+			*[!0-9]*)
+				error "Argument for '--repeat' is not a number"
+				return 1
+				;;
+		esac
+	fi
+
+	if [ "$LIST" ]; then
+		case "$FUNCTION" in
+			list)
+				;;
+			*)
+				error "'--$LIST' is not valid for '$FUNCTION'"
+				return 1
+				;;
+		esac
+	fi
+
+	if [ ! "$APLAY" ]; then
+		case "$FUNCTION" in
+			start|queue|random|track|previous|next|codec)
+				if ! installed aplay; then
+					error "'aplay' not found. Please install 'alsa-utils'"
+					return 1
+				fi
+				unset -- FLAC OPUS WAVPACK TTA OGG AAC MPC MP3 FFMPEG
+				installed flac && FLAC=true
+				installed opusdec && OPUS=true
+				installed wvunpack && WAVPACK=true
+				installed ttaenc && TTA=true
+				installed oggdec && OGG=true
+				installed oggdec && AAC=true
+				installed mpcdec && MPC=true
+				installed lame && MP3=true
+				installed ffmpeg && FFMPEG=true
+				APLAY=true
+				;;
+		esac
+	fi
+
+	case "$FUNCTION" in
+		help|start|list|previous|next|pause|resume|reset|edit|clear|stop)
+			if [ $# -gt 0 ]; then
+				error "Too many arguments"
+				return 1
+			fi
+			;;
+		queue)
+			if [ $# -eq 0 ]; then
+				error "No file was given"
+				return 1
+			fi
+			;;
+		codec)
+			if [ $# -gt 1 ]; then
+				error "Too many files, should be only one"
+				return 1
+			elif [ $# -eq 0 ]; then
+				error "No file was given"
+				return 1
+			fi
+			;;
+		random|track)
+			if [ $# -gt 1 ]; then
+				error "Too many arguments, should be only one"
+				return 1
+			elif [ $# -eq 0 ]; then
+				error "No number was given"
+				return 1
+			fi
+			case "$1" in
+				*[!0-9]*)
+					error "Argument is not a number"
+					return 1
+			esac
+			;;
+		*)
+			error "Unknown option '$FUNCTION'"
+			help >&2
+			return 1
+			;;
+	esac
+
+	if [ "$REPEAT" ]; then
+		while [ $REPEAT -gt 0 ]; do
+			"$FUNCTION" "$@"
+			REPEAT=$((REPEAT-1))
+		done
+	else
+		"$FUNCTION" "$@"
+        #pkill -x -RTMIN+9 waybar # Send signal to update shmus module on waybar 
+	fi
+}
+
+checkpath file "$NTLIST" "$PTLIST" "$TPID" "$HPID"
+
+if [ $# -eq 0 ]; then
+	while read LINE; do
+		set -- $LINE
+		parse "$@"
+	done
+else
+	parse "$@"
+fi

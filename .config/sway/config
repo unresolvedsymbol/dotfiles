@@ -1,0 +1,350 @@
+#
+## Variables and subprocess
+#
+
+# Super key
+set $mod Mod1
+
+# Terminal
+set $term footclient
+
+# Home row direction keys, like vim
+set $left h
+set $down j
+set $up k
+set $right l
+
+# Wal colors
+include ~/.cache/wal/colors-sway
+
+# Swaynag colors
+#swaynag_command "swaynag -c ~/.cache/wal/colors-swaynag"
+
+# Oguri
+#swaybg_command "oguri-swaybg"
+
+# Set wallpaper
+output * bg "$wallpaper" fill
+
+# Update Xresources
+exec_always xrdb -I$HOME ~/.Xresources
+
+# Refresh KDE Connect(ions)
+exec_always kdeconnect-cli --refresh
+
+# Auto lock, suspend, etc
+exec swayidle \
+    timeout 300 'lock' \
+	# timeout 450 'swaymsg "output * dpms off"' \
+	timeout 900 'sudo zzz' \
+	resume 'swaymsg "output * dpms on"'
+
+# Notification daemon
+exec mako --background-color=$background --border-color=$color1 --text-color=$foreground
+
+# Start redshift
+exec redshift
+
+# Terminal server
+exec_always foot --server
+
+#
+## Colors
+#
+
+# border        the border around the title bar
+# background	the background of the title bar
+# text		    the text color of the title bar
+# indicator     the color used to indicate where a new window will open
+# child border	the border around the view itself
+
+# class			        border		background	    text		    indicator	child border
+client.focused		    $color0		$background		$foreground	    $color7		$background
+client.focused_inactive	$color2	    $background 	$foreground	    $color6		$color2
+client.unfocused	    $color3	    $background 	$foreground	    $color6		$color3
+#client.urgent		    #2f343a		#900000	    	$foreground	    #900000		#900000
+
+#
+## Shortcuts
+#
+
+# Terminal
+bindsym $mod+semicolon exec $term
+
+# Kill focused window
+bindsym $mod+q kill
+
+# Program launchers
+for_window [title="Launcher"] sticky enable, resize set 484 318, floating enable
+bindsym $mod+d exec launch Launcher launcher
+bindsym $mod+shift+d exec launch Launcher desktoplauncher
+# Alacritty currently doesn't support emoji properly...
+bindsym $mod+shift+e exec TERMCMD="termite" launch Launcher emojipicker
+
+# Screenshot/screenrecord
+bindsym $mod+u exec screenshot -a
+bindsym $mod+shift+u exec screenshot -c -w
+bindsym $mod+y exec screenshot -r
+
+# Enable floating window dragging
+floating_modifier $mod normal
+
+# Reload configuration
+bindsym $mod+shift+r reload; exec source $HOME/.profile
+
+# TODO Figure out why these don't load on initial startup
+# Parse shortcuts
+exec_always sleep 2 && awk -F, '{sub("term","$term",$$3);system("swaymsg bindsym $mod+"$$1" exec \-\- "$$3)}' ~/.config/shortcuts
+
+# Exit sway (logs you out of your Wayland session)
+bindsym $mod+shift+q exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -b 'Yes, exit sway' 'swaymsg exit'
+
+#
+## Focus
+#
+
+bindsym $mod+$left focus left
+bindsym $mod+$down focus down
+bindsym $mod+$up focus up
+bindsym $mod+$right focus right
+
+bindsym $mod+shift+$left move left
+bindsym $mod+shift+$down move down
+bindsym $mod+shift+$up move up
+bindsym $mod+shift+$right move right
+
+#
+## Workspaces
+#
+
+bindsym $mod+1 workspace 1
+bindsym $mod+2 workspace 2
+bindsym $mod+3 workspace 3
+bindsym $mod+4 workspace 4
+bindsym $mod+5 workspace 5
+bindsym $mod+6 workspace 6
+bindsym $mod+7 workspace 7
+bindsym $mod+8 workspace 8
+bindsym $mod+9 workspace 9
+bindsym $mod+0 workspace 10
+
+bindsym $mod+shift+1 move container to workspace 1
+bindsym $mod+shift+2 move container to workspace 2
+bindsym $mod+shift+3 move container to workspace 3
+bindsym $mod+shift+4 move container to workspace 4
+bindsym $mod+shift+5 move container to workspace 5
+bindsym $mod+shift+6 move container to workspace 6
+bindsym $mod+shift+7 move container to workspace 7
+bindsym $mod+shift+8 move container to workspace 8
+bindsym $mod+shift+9 move container to workspace 9
+bindsym $mod+shift+0 move container to workspace 10
+
+#
+## Layout/Containers
+#
+
+# You can "split" the current object of your focus with
+# $mod+b or $mod+v, for horizontal and vertical splits
+# respectively.
+#bindsym $mod+b splith
+#bindsym $mod+v splitv
+
+# Switch the current container between different layout styles
+bindsym $mod+s layout stacking
+bindsym $mod+w layout tabbed
+bindsym $mod+e layout toggle split
+
+# Change layout for new windows 
+bindsym $mod+i split toggle
+
+# Make the current focus fullscreen
+bindsym $mod+f fullscreen
+
+popup_during_fullscreen smart
+
+# Toggle the current focus between tiling and floating mode
+bindsym $mod+shift+space floating toggle
+
+# Swap focus between the tiling area and the floating area
+bindsym $mod+space focus mode_toggle
+
+# Focus parent container
+bindsym $mod+bracketright focus parent
+
+# Focus child container
+bindsym $mod+bracketleft focus child
+
+#
+## Dropdowns/Scratchpads
+#
+
+# Move the currently focused window to the scratchpad
+bindsym $mod+shift+minus move scratchpad
+
+# Show the next scratchpad window or hide the focused scratchpad window.
+bindsym $mod+minus scratchpad show
+
+#
+## Function keys
+#
+
+# Unmute and set these to full volume and only control the master
+exec_always amixer set Speaker 100%
+exec_always amixer set Speaker on
+exec_always amixer set Headphone 100%
+exec_always amixer set Headphone on
+
+# Volume
+bindsym --locked XF86AudioMute exec amixer set Master toggle && pkill -x -RTMIN+11 waybar
+bindsym --locked XF86AudioLowerVolume exec amixer set Master 5%- && pkill -x -RTMIN+11 waybar
+bindsym --locked XF86AudioRaiseVolume exec amixer set Master 5%+ && pkill -x -RTMIN+11 waybar
+bindsym --locked XF86AudioLowerVolume+shift exec amixer set Master 1%- && pkill -x -RTMIN+11 waybar
+bindsym --locked XF86AudioRaiseVolume+shift exec amixer set Master 1%+ && pkill -x -RTMIN+11 waybar
+#bindsym --locked XF86AudioMuteMic exec volumectl mutemic
+
+# Brightness
+bindsym --locked XF86MonBrightnessDown+shift exec brightnessctl set -- -1%
+bindsym --locked XF86MonBrightnessUp+shift exec brightnessctl set +1%
+bindsym --locked XF86MonBrightnessDown exec brightnessctl set -- -5%
+bindsym --locked XF86MonBrightnessUp exec brightnessctl set +5%
+
+# ADB
+#bindsym --locked XF86LaunchA exec adb shell input keyevent 25
+#bindsym --locked XF86Explorer exec adb shell input keyevent 24
+
+# Lock
+bindsym ctrl+alt+delete exec lock
+
+
+# Title bar font
+font monospace 10
+
+# Window borders
+default_border pixel 5
+default_floating_border normal
+
+# Disable dragging
+tiling_drag disable
+
+#
+## Swtiches
+#
+
+# Lock and suspend on lid close
+bindswitch --locked lid:on exec sh -c "swaylock -f --indicator-radius 80 -c 000000; [ ! -e \"/tmp/.locked\" ] && sudo zzz"
+
+#
+## Modes
+#
+
+mode "Resize" {
+	bindsym $left resize shrink width 10px or 1ppt
+	bindsym $down resize grow height -10px or 1ppt
+	bindsym $up resize shrink height -10px or 1ppt
+	bindsym $right resize grow width 10px or 1ppt
+
+	bindsym shift+$left resize shrink width 30px or 2ppt
+	bindsym shift+$down resize grow height -30px or 2ppt
+	bindsym shift+$up resize shrink height -30px or 2ppt
+	bindsym shift+$right resize grow width 30px or 2ppt
+
+	bindsym Return mode "default"
+	bindsym Escape mode "default"
+	bindsym $mod+r mode "default"
+}
+
+bindsym $mod+r mode "Resize"
+
+# Faster keybindings for moving foating windows
+mode "Move" {
+	bindsym $left move left 10
+	bindsym $down move down 10
+	bindsym $up move up 10
+	bindsym $right move right 10
+
+	bindsym shift+$left move left 30
+	bindsym shift+$down move down 30
+	bindsym shift+$up move up 30
+	bindsym shift+$right move right 30
+
+	bindsym Return mode "default"
+	bindsym Escape mode "default"
+	bindsym $mod+m mode "default"
+}
+
+bindsym $mod+m mode "Move"
+
+mode "ATV" {
+    # Arrow keys
+
+    bindsym $left exec adbkey /dev/input/event1 105
+    bindsym $down exec adbkey /dev/input/event1 108
+    bindsym $up exec adbkey /dev/input/event1 103
+    bindsym $right exec adbkey /dev/input/event1 106
+
+    bindsym left exec adbkey /dev/input/event1 105
+    bindsym down exec adbkey /dev/input/event1 108
+    bindsym up exec adbkey /dev/input/event1 103
+    bindsym right exec adbkey /dev/input/event1 106
+
+    # Center/Enter
+
+    bindsym next exec adbkey /dev/input/event1 353
+    bindsym semicolon exec adbkey /dev/input/event1 353
+
+    # Back
+
+    bindsym prior exec adbkey /dev/input/event1 158
+	bindsym return exec adbkey /dev/input/event1 158
+
+    # Text input dialog
+
+    bindsym i mode "default"; exec $TERMCMD --title adbtext -e adbtext && swaymsg mode ATV
+
+    # Home
+
+    bindsym space exec adbkey /dev/input/event1 172
+
+    # Volume
+
+    bindsym comma exec adbkey /dev/input/event1 114
+    bindsym period exec adbkey /dev/input/event1 115
+
+	bindsym escape mode "default"
+	bindsym $mod+b mode "default"
+}
+
+for_window [title="adbtext"] floating enable, sticky enable, resize set 444 90
+
+bindsym $mod+b mode "ATV"
+
+bindsym $mod+comma exec adbkey /dev/input/event1 114
+bindsym $mod+period exec adbkey /dev/input/event1 115
+
+bar {
+	swaybar_command waybar
+}
+
+# Workspace tabbing
+bindsym $mod+tab workspace next_on_output
+bindsym $mod+tab+shift workspace prev_on_output
+
+# Gaps
+gaps inner 2
+
+# Transparency
+for_window [app_id="firefox"] opacity 0.95 # Browser
+for_window [app_id="mako"] opacity 0.5 # Notifications
+for_window [class="URxvt"] opacity 0.95
+# $TERMCMD -a tty-clock tty-clock -tBC1
+for_window [app_id="tty-clock"] floating enable, resize set 260 130, move absolute position 3580 945
+for_window [app_id="floating"] floating enable
+
+# Hide wl-clipboard fake window
+for_window [title="wl-clipboard"] floating enable
+
+# Make icecat picture in picture useful
+for_window [title="Picture-in-Picture"] floating enable, sticky enable
+
+# Include other configs
+include ~/.local/etc/sway/config.d/*

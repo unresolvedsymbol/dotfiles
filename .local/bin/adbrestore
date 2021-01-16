@@ -1,0 +1,13 @@
+#!/bin/sh
+[ ! "$1" ] || [ ! -e "$1" ] && {
+	echo "Usage: $0 <backup.ab>"
+	exit 1
+}
+ab="${1%.*}"
+java -jar ~/Downloads/abe-all.jar unpack "$1" - apw | tar xf - --wildcards '*.apk'
+for apk in $ab/*/a/base.apk; do
+	pkg=$(echo -n "$apk" | cut -d'/' -f2)
+	adb install $apk >/dev/null && echo "Installed $pkg" || echo "Failed to install $pkg"
+done
+rm -rf "$1"
+adb restore "$1"

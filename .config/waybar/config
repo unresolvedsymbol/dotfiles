@@ -1,0 +1,182 @@
+// Requires Font Awesome 4
+// All external commands are inline
+
+{
+	"layer": "top",
+	"position": "top",
+	"output": "eDP-1",
+	"height": 36,
+	"margin": "2 2 0 2",
+	"modules-left": ["sway/workspaces", "sway/mode", "sway/window"],
+	"modules-center": [],
+	"modules-right": ["custom/weather", "custom/shmus", "custom/recording", "custom/alsa", "network", "custom/bluetooth", "custom/vpn", "custom/disk", "cpu", "memory", "temperature", "backlight", "custom/bulb", "battery", "clock", "tray", "idle_inhibitor", "custom/reisub"],
+	"sway/workspaces": {
+		"format": "{icon}",
+		// Roman numeral indicators
+		"format-icons": {
+			"1": "I",
+			"2": "II",
+			"3": "III",
+			"4": "IV",
+			"5": "V",
+			"6": "VI",
+			"7": "VII",
+			"8": "VIII",
+			"9": "IX",
+			"10": "X"
+		}
+	},
+	// Keeps swayidle from doing anything when switch is on
+	"idle_inhibitor": {
+		"format": "{icon}",
+		"format-icons": {
+			"activated": " ",
+			"deactivated": " "
+		},
+		"tooltip": false
+	},
+	// Current bind mode of sway
+	"sway/mode": {
+		"format": "{}"
+	},
+	"sway/window": {
+		"max-length": 40
+	},
+	"tray": {
+		"icon-size": 21,
+		"spacing": 10
+	},
+	"clock": {
+		"format": "{:%a, %b %d, %Y at %I:%M %p}",
+		"tooltip": false
+	},
+	"cpu": {
+		"format": " {usage}%",
+		"interval": 3,
+		"states": {
+			"warning": 40,
+			"critical": 80
+		},
+		"tooltip": false
+	},
+	"memory": {
+		"format": " {}%",
+		"interval": 1,
+		//"states": {
+		//	  "warning": 40,
+		//	  "critical": 80
+		//},
+		// This doesn't take account swap and the critical warning is getting annoying...
+		"tooltip": false
+	},
+	"temperature": {
+		"critical-threshold": 80,
+		"format": " {temperatureC}°C"
+	},
+	"backlight": {
+		"format": "{percent}%  ",
+		"on-scroll-up": "brightnessctl s -- +1",
+		"on-scroll-down": "brightnessctl s -- -1"
+	},
+	"battery": {
+		"states": {
+			"good": 95,
+			"warning": 30,
+			"low": 15,
+			"critical": 5
+		},
+		"format": "{capacity}% {icon} ",
+		"format-charging": "{capacity}% {icon}  ",
+		"format-icons": ["", "", "", "", ""],
+		"tooltip": false,
+		"interval": 30
+	},
+	"network": {
+		"format-wifi": " {essid} ({signalStrength}%) [{ipaddr}]",
+		"format-ethernet": " {ifname}: [{ipaddr}]",
+		"format-disconnected": "",
+		"tooltip": false,
+		"interval": 5
+	},
+	"pulseaudio": {
+		"scroll-step": 5,
+		"format": "{icon} {volume}%",
+		"format-icons": {
+			"headphones": "",
+			"default": ["", "", ""]
+		},
+		"format-muted": "",
+		"on-click": "volumectl mute",
+		"tooltip": false
+	},
+	"custom/alsa": {
+		"exec": "amixer get Master | sed -nre 's/.*\\[off\\].*/   \\n\\nmuted/p; s/.*\\[(.*%)\\].*/ \\1/p'",
+		"on-click": "amixer set Master toggle; pkill -x -RTMIN+11 waybar",
+		"on-scroll-up": "amixer set Master 1+; pkill -x -RTMIN+11 waybar",
+		"on-scroll-down": "amixer set Master 1-; pkill -x -RTMIN+11 waybar",
+		"signal": 11,
+		"interval": 10,
+		"tooltip": false
+	},
+	"custom/shmus": {
+		"exec": "shmus list --current | awk 'length > 40{$0=substr($0,0,41)\"...\"}1'",
+		"exec-if": "test $(ps hos $(cat ~/.cache/shmus/track)) != T", // Only show if playing
+		"exec-if": "test -f ~/.cache/shmus/track",
+		"interval": 5,
+		"signal": 9,
+		"tooltip": false
+	},
+	"custom/redshift": {
+		"exec": "test -r ~/.temperature && echo $(cat ~/.temperature)K",
+		"format": " {}",
+		"interval": 1,
+		"tooltip": false
+	},
+	"custom/bulb": {
+		"format": " {}",
+		"exec": "yee status | sed -n 's/* power: off//p;s/* power: on//p'",
+		"on-click": "yee toggle && pkill -x -RTMIN+8 waybar",
+		"signal": 8,
+		"interval": 5,
+		"tooltip": false
+	},
+	"custom/shortcuts": {
+		"exec": "awk -F, '{printf((NR>1?\" | \":\"\")toupper($1)\": \"$2\"	\")}' ~/.config/shortcuts",
+		"tooltip": false
+	},
+	"custom/vpn": {
+		"exec": "echo -n \"($(pgrep -cx openvpn)) \"; pgrep -anx openvpn | grep -oE \"(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\" | head -1",
+		"exec-if": "pgrep -nx openvpn",
+		"format": " {}",
+		"interval": 5,
+		"tooltip": false
+	},
+	"custom/disk": {
+		"exec": "df -h --output=pcent,avail / | sed 1d | awk '{print $1\" (\"$2\")\"}'",
+		"format": " {}",
+		"interval": 1,
+		"tooltip": false
+	},
+	"custom/bluetooth": {
+		"exec": "echo info | bluetoothctl | grep Name | cut -d' ' -f 1 --complement",
+		"format": " {}",
+		"interval": 1,
+		"tooltip": false
+	},
+	"custom/recording": {
+		"exec": "pgrep wf-recorder",
+		"on-click": "screenshot -r",
+		"format": "      ",
+		"interval": 3,
+		"tooltip": false
+	},
+	"custom/reisub": {
+		"interval": 900,
+		"format": "REISUB"
+	},
+	"custom/pid": {
+		"exec": "swaymsg -t get_tree | jq -r '.. | objects | select(.focused==true).pid'",
+		"format": "[{}]",
+		"interval": 1
+	}
+}

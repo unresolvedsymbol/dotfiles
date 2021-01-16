@@ -1,0 +1,2 @@
+#!/bin/sh
+swaymsg "$(find /usr/share/applications /usr/local/share/applications $HOME/.local/share/applications -type f -name '*.desktop' -exec awk -vOFS= -vshell=$(getent passwd $LOGNAME | cut -d: -f7) -F= '$1=="Name"{n=$2}$1=="Terminal"&&$2=="true"{t=1}$1=="Exec"{$1="";x=$0}{if(n&&x){print "exec "(t?"$TERMCMD -e"shell" -ic ":"")x"\t"n;exit}}' {} \; 2>/dev/null | sort -u | fzf -d'\t' --with-nth=2 | cut -f1)"

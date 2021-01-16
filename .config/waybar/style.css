@@ -1,0 +1,89 @@
+@import url('/home/void/.cache/wal/waybar.css');
+
+* {
+	border: none;
+	border-radius: 0;
+	font-family: monospace;
+	font-size: 12px;
+	min-height: 0;
+}
+
+window#waybar {
+	background: @background;
+	/* border-bottom: 3px solid rgba(100, 114, 125, 0.5); */
+	color: #ffffff;
+}
+
+/* https://github.com/Alexays/Waybar/wiki/FAQ#the-workspace-buttons-have-a-strange-hover-effect */
+#workspaces button {
+	padding: 0 2px;
+	background: transparent;
+	color: #ffffff;
+	border-bottom: 3px solid transparent;
+}
+
+#workspaces button.focused {
+    background: @color3;
+	border-bottom: 3px solid @color1;
+}
+
+#workspaces button:hover {
+  box-shadow: inherit;
+  text-shadow: inherit;
+}
+
+#mode {
+	background: #c0020f;
+	border: 2px solid #970c15;
+	padding: 0 6px; /* Padding is around text for background */
+	margin: 0 5px 0 5px;
+}
+
+#window, #custom-pid {
+	margin: 0 5px;
+}
+
+#clock, #custom-weather, #custom-redshift, #custom-bulb, #custom-alsa, #battery, #cpu, #memory, #temperature, #backlight, #network:not(.disconnected), #pulseaudio, #custom-media, #tray, #idle_inhibitor, #custom-vpn, #custom-disk, #custom-shmus, #custom-bluetooth, #custom-recording, #custom-reisub {
+	/* top right bottom left */
+	/* top/bottom left/right */
+
+	margin: 0 5px; /* Margin is between other modules */
+	border-bottom: 3px solid @color1;
+	padding: 0 6px;
+}
+
+#custom-shortcuts {
+    background-color: @color4;
+    color: #000000;
+    margin: 0 8px;
+    padding: 0 6px;
+}
+
+#battery.warning:not(.charging), #cpu.warning, #memory.warning {
+	background: #ffe500;
+	color: #000000;
+}
+
+#pulseaudio.muted, #custom-alsa.muted, #battery.low:not(.charging), #cpu.critical, #custom-recording {
+	background: #f53c3c;
+	color: #000000;
+}
+
+#battery.critical:not(.charging), #temperature.critical, #memory.critical {
+	background: #f53c3c;
+	color: #ffffff;
+	animation-name: blink;
+	animation-duration: 0.3s;
+	animation-timing-function: linear;
+	animation-iteration-count: infinite;
+	animation-direction: alternate;
+}
+
+
+
+@keyframes blink {
+	to {
+		background-color: #ffffff;
+		color: #000000;
+	}
+}

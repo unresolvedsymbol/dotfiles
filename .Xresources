@@ -1,0 +1,4 @@
+#include ".cache/wal/colors.Xresources"
+
+URxvt*scrollBar: false
+URxvt*font: xft:Monospace:pixelsize=12

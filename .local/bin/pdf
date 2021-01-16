@@ -1,0 +1,22 @@
+#!/bin/bash
+# MUPDF page saving script
+# Created by unresolvedsymbol
+# Shield your eyes
+CACHE_DIR="$HOME/.cache/mupdf/" # Cache directory path
+PAGE_FILE="$CACHE_DIR$(basename "$1").page" # Page file path
+echo $PAGE_FILE
+mkdir -p $CACHE_DIR # Make sure cache directory exists
+mupdf "$1" & # Start mupdf
+PID=$! # Save PID of mupdf to keep loop running while process is alive
+xdotool search --sync --onlyvisible --class "mupdf" &> /dev/null # Wait for mupdf to open
+test -r "$PAGE_FILE" && PAGE=$(cat "$PAGE_FILE") # Try to read page file
+xdotool key c # Turn on grayscale
+xdotool key i # Turn on color inversion
+# Go to page by entering page command, this also checks if it's only numbers so it's not used for keyjacking
+[[ "$PAGE" =~ ^[0-9]+$ ]] && echo -n "$PAGE" | sed -e 's/\(.\)/\1\n/g' | xargs xdotool key && xdotool key g
+while sleep 0.5 && test -d /proc/$PID; do 
+	test "$(xprop -id $(xprop -root 32x '\t$0' _NET_ACTIVE_WINDOW | cut -f 2) WM_CLASS | cut -d\" -f2)" = "mupdf" && { # Sad code, I wish xdotool could give you classes
+		PAGE=$(xdotool getwindowfocus getwindowname | grep -Eo "[0-9]+\/[0-9]+" | cut -d\/ -f1) # Parse page number from mpdf title
+		test "$PAGE" && echo -n "$PAGE" > "$PAGE_FILE" # Save page if variable is not empty (grep failed or something)
+	}
+done

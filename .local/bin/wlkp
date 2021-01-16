@@ -1,0 +1,18 @@
+#!/bin/env bash
+#
+## Simple and secure keepassxc interface script for wayland and native apps
+#
+## The main point of this is using wl-clipboard to only paste once for security
+## then clear it after 5 seconds even if you haven't pasted it (also for security)
+#
+
+copy() {
+    wl-copy -o
+    (sleep 5; wl-copy -c; notify-send wlkp Clipboard\ cleared &)
+}
+
+generate_username() {
+    keepassxc-cli diceware -W 2 | tr -d ' \n'
+}
+
+# TODO: The rest

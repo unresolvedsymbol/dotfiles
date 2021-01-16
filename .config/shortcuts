@@ -1,0 +1,4 @@
+p,,firefox-wayland
+t,,urxvt -e ranger
+n,,term -e newsboat
+o,,term -e neomutt

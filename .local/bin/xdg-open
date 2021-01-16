@@ -1,0 +1,9 @@
+#!/bin/sh
+# handle files with rifle otherwise use xdg (uris etc)
+echo -n "$@" | grep -E -q "http[s]?:\/\/" &&
+	exec $BROWSER $@ 
+
+[ -e "$@" ] && (
+	$TERMCMD $SHELL -ic "rifle $@" ||
+		/usr/bin/xdg-open $@
+	)

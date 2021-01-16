@@ -1,0 +1,41 @@
+#!/bin/sh
+# Modification of lukesmith's ddspawn script
+#[ -z "$1" ] && [ -z "$2" ] && exit 1
+
+#usage() {
+#    echo "Usage: $(basename $0) type name command"
+#    echo
+#    echo "Types: "
+#    echo "x: X11 application"
+#    echo "wl: Wayland application"
+#    echo "cli: Console application (will run in a $TERMCMD instance)"
+#    exit 1
+#}
+
+echo "Currently WIP"
+exit 1
+
+search=$(swaymsg -t get_tree | jq --arg name "$1" -r '.. | objects | select(.name==$name//.app_id==$name//.instance==$name).pid' | tr '\n' ' ')
+[ "$search" ] && {
+    echo "Found!"
+    for pid in $search; do
+        #
+    done
+}
+: << EOF
+    swaymsg "[instance=\"$1\"] scratchpad show" || {
+        swaymsg "exec $1"
+        # swaymsg -t get_tree | jq -r '.. | objects | select(.focused==true).id'
+        while [ $(swaymsg -t get_tree | grep -c "\"instance\": \"$1\"") -eq 0 ]; do
+            sleep 0.5;
+            x=$((x+1))
+            [ $x -lt 15 ] || exit 1
+        done
+	    swaymsg "[instance=\"$1\"] move to scratchpad, scratchpad show"
+            test "$2" && swaymsg "[instance=\"$1\"] $2"
+    }
+EOF
+    # Some terminals parse this differently ffs
+    $TERMCMD --title $name -e $SHELL -ic '$spawn' ||
+        $TERMCMD --title $name -e "$SHELL -ic '$spawn'" ||
+        $TERMCMD --title $name $SHELL -ic '$spawn'

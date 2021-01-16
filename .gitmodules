@@ -1,0 +1,9 @@
+[submodule "zsh-vimode-visual"]
+	path = .config/zsh-vimode-visual
+	url = https://github.com/b4b4r07/zsh-vimode-visual
+[submodule ".config/qutebrowser/dracula"]
+	path = .config/qutebrowser/dracula
+	url = https://github.com/dracula/qutebrowser-dracula-theme.git
+[submodule ".config/powerlevel10k"]
+	path = .config/powerlevel10k
+	url = https://github.com/romkatv/powerlevel10k

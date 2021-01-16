@@ -1,0 +1,43 @@
+#!/bin/zsh
+
+# ADBoot by Void - the solution to your bootloader woes
+# Enter the Essential phone, which doesn't support the latest fastboot or USB 3.0,
+# and has even lost countless devices to EDL or unrecoverable softbricks due
+# to the bootloader still being locked. (flashing unlock and unlock_critical asap!)
+# And if your argument against so is FRP, theres already a bypass: Security doesn't
+# matter once someone has physical access of the device. If you're worried about your
+# data, encrypt it. So lets stop killing the planet people :)
+
+# Fucking "relock the bootloader for safety" headass essential
+# Then being such a fucking failure of a company that OTAs hardbrick
+
+[ "$1" = "flash" ] && {
+    adb wait-for-any
+    base=$(adb shell echo /dev/block/platform/soc/\*/by-name)
+    print -P "%F{yellow}Writing [$3 -> $2] over ADB..."
+    while true; do
+        #adb shell blockdev --setrw ${base}/$2
+        pv $3 | adb shell dd of=${base}/$2 2>/dev/null && {
+            goodsum=$(cksum $3 | cut -d\  -f1)
+            testsum=$(adb shell cksum ${base}/$2 | cut -d\  -f1)
+            [ "$testsum" = "$goodsum" ] && {
+                print -P "%F{green}Integrity check succeeded!"
+                break
+            } || {
+                print -P "%F{red}Integrity check failed. Expected ${goodsum}, got ${testsum}."
+                print -P "%F{red}This may false positive, verify the same checksum is read twice."
+            }
+        } || print -P "%F{red}Write failed."
+
+        print -Pn "%F{red}Retry? [Y/(n)] "
+        read -s input
+        char=$(echo -n $input | head -c1)
+        echo
+        [ "$char" = "y" ] || [ "$char" = "Y" ] &&
+            print -P "%F{orange}Retrying..." || {
+            print -P "%F{orange}Ignoring..."
+            break
+        }
+        unset input
+    done
+}

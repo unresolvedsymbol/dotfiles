@@ -1,0 +1,36 @@
+#!/bin/bash
+
+[ $(id -u) -eq 0 ] && echo "Don't lock as root" && exit 1
+
+locker="$(mktemp --suffix=.png)"
+
+grim $locker
+[ "$1" ] && cp $(awk 'NR == 1 { print $3 }' .cache/wal/colors-sway) $locker || {
+	textwidth=469
+	textheight=47
+	
+	lockwidth=170
+	lockheight=170
+	
+	IFS=$'\n'
+	for output in $(swaymsg -t get_outputs | jq -r '.[].rect | "\(.width) \(.height) \(.x) \(.y)"'); do
+	    IFS=$' '
+	    output=($output)
+	    width=${output[0]}
+	    height=${output[1]}
+		x=$((output[2]-width))
+		y=${output[3]}
+		#echo ${width}x${height} +${x},${y}
+		layers+=" '$HOME/.config/lock.png' '-gravity' 'center' '-composite'"
+		# TODO: Damn swaymsg -t get_outputs just doesn't work the same as X
+		#layers+=" '$HOME/.config/lock.png' '-geometry' '+$((x+width/2-lockwidth/2))+$((y+height/2-lockheight/2))' '-composite'"
+		#layers+=" '$HOME/.config/text.png' '-geometry' '+$((x+width/2-textwidth/2))+$((y+height/2-textheight/2+200))' '-composite'"
+	    IFS=$'\n'
+	done
+	
+	eval convert $locker -blur 0x4 $layers $locker
+}
+
+swaylock -f -t --indicator-radius 80 -i $locker # Semi transparent black
+
+rm $locker

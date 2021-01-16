@@ -1,0 +1,11 @@
+#!/bin/sh
+export SDL_VIDEODRIVER=wayland
+# breaks some apps
+export GDK_BACKEND=wayland
+export _JAVA_AWT_WM_NONREPARENTING=1 # Fix for some java stuff on wl
+export QT_QPA_PLATFORM=wayland-egl # Problematic occasionally
+export QT_WAYLAND_DISABLE_WINDOWDECORATION=1
+#export QT_WAYLAND_FORCE_DPI=physical
+export QT_SCALE_FACTOR=1.25
+RUST_BACKTRACE=1 sway -d > ~/.swaylog 2>&1 || cp ~/.swaylog ~/swaycrash_"$(date +%Y-%m-%d-%H%m%S)"
+termfix "$(tty)"

@@ -1,0 +1,9 @@
+#!/bin/sh
+path="$HOME/Journal/$(date +%G/%m)"
+echo $path
+mkdir -p $path
+cd $path
+file="$(date +%d)"
+[ -a $file ] || echo -e "\n-+-> Daily journal started $(date +%c)\n" > $file
+echo -e "\n-+-> Entry at $(date +%r)\n" >> $file
+vim $file

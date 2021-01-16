@@ -1,0 +1,12 @@
+#!/bin/sh
+
+[ "$1" ] && [ "$2" ] || {
+    echo "Usage: "$(basename "$0")" <input device path> <key code>"
+    exit 1
+}
+
+adb shell sendevent "$1" 1 "$2" 1
+adb shell sendevent "$1" 0 0 0
+sleep 0.1
+adb shell sendevent "$1" 1 "$2" 0
+adb shell sendevent "$1" 0 0 0

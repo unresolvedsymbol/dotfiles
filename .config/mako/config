@@ -1,0 +1,5 @@
+margin=5,3,5
+padding=5
+width=300
+default-timeout=5000
+font=monospace 10

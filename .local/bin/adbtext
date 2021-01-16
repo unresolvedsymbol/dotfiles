@@ -1,0 +1,3 @@
+#!/bin/sh
+read -r text
+adb shell input keyboard text "'${text}'"

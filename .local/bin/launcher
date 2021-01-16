@@ -1,0 +1,12 @@
+#!/usr/bin/env zsh
+: << 'EOF'
+case "$(basename $0)" in
+	bash) commands=$(compgen -c);;
+	zsh) commands=$(echo "${(k)commands}" | tr ' ' '\n');;
+	*) ;; # TODO Loop through PATH and find files prob
+esac
+# TODO: Make this not bash reliant
+# TODO: User shell specific magic? zsh ${(k)commands}
+swaymsg -- "exec $(echo ${commands} | sort -u | fzf)"
+EOF
+swaymsg -- "exec $(echo ${(k)commands} | tr ' ' '\n' | sort -u | fzf)"

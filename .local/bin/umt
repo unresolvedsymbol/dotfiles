@@ -1,0 +1,15 @@
+#!/bin/sh
+for x in "$@"; do
+	mnt=$(findmnt "$x" -J) || {
+		echo "Can't find mount $x!"
+		continue
+	}
+
+	[ '$(echo "$mnt" | jq -r ".[][0].fstype" | cut -d\. -f1)' = "fuse" ] &&
+		echo "FUSE detected" &&
+		fusermount -u '$(echo "$mnt" | jq -r ".[][0].target")' &&	
+		exit 0
+
+	block=$(echo "$mnt" | jq -r '.[][0].source')
+	udisksctl unmount -b "$block" || (sudo umount "$block" && echo "Unmounted $x.") || echo "Failed to unmount $x."
+done

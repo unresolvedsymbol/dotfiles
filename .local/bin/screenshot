@@ -1,0 +1,78 @@
+#!/bin/sh
+
+usage() {
+    echo "Usage: $(basename $0)"
+    echo "    -c      Include cursor"
+    echo
+    echo "    -a      Take screenshot of selected area"
+    echo "    -w      Take screenshot of focused window"
+    echo "    -d      Take screenshot of focused display"
+    echo
+    echo "    -o      Read text in screenshot"
+    echo "    -r      Record with wf-recorder"
+    exit
+}
+
+prefix="Screenshot"
+output="png"
+path="$HOME/Pictures/Screenshots"
+recordingPath="$HOME/Videos"
+
+while getopts "rcawdo" opt; do
+    case ${opt} in
+        # Recording
+        r) 
+        pid=$(pgrep -ox wf-recorder)
+        [ "$pid" ] && {
+            file=$(cut -d '' -f5 /proc/${pid}/cmdline)
+            echo $pid
+            kill -s 2 $pid &&
+            notify-send -u low -t 5000 "Recording finished" "Saved to $file"
+            exit
+        }
+        prefix="Recording"
+        path="$recordingPath"
+        output="mp4"
+        record=1;;
+        # Show cursor
+        c) cursor="-c";;
+        # Selection screenshot
+        a) geo=$(slurp) || {
+                echo "Selection cancelled."
+                notify-send -u low -t 1500 "Selection cancelled"   
+                exit 1
+            };; # TODO: Fix slurp using escape over shift when rebound in sway xkb_options
+        # Window screenshot
+        w) geo=$(swaymsg -t get_tree | jq -r '.. | objects | select(.focused==true) | "\(.rect.x),\(.rect.y) \(.rect.width)x\(.rect.height)"');;
+        # Display screenshot
+        d) geo=$(swaymsg -t get_outputs | jq -r '.[] | select(.focused==true).rect | "\(.x),\(.y) \(.width)x\(.height)"');;
+        # OCR
+        o) ocr=1;;
+        \?) usage;;
+    esac
+done
+
+mkdir -p "$path"
+cd "$path"
+
+file="${prefix}_$(date +%Y-%m-%d-%H%m%S)$(echo _$geo | cut -d' ' -f2 | sed 's/_$//').${output}"
+
+[ "$record" ] && {
+    (test -n "$geo" && wf-recorder -g "$geo" -f $file || wf-recorder -o "$(swaymsg -t get_outputs | jq -r '.[] | select(.focused==true).name')" -f $file) & >/dev/null;
+    notify-send -u low -t 3000 "Recording started"
+    echo "Recording started in background, run again to stop."
+    exit
+}
+
+# TODO: Simplify (works fine in zsh, not posix shell)
+test -n "$geo" && echo $geo | grim -g - -t $output $file ||
+grim $cursor -t $output $file
+
+[ ! "$record" ] && [ $ocr ] && {
+    tesseract ${file} ${file}.txt
+    cat ${file}.txt | tr -d '\n\f' | wl-copy
+} || cat ${file} | wl-copy -t $(file -b --mime-type ${file})
+
+(aplay $HOME/.config/CaptureSound.wav &) 2>/dev/null
+notify-send -u low -t 5000 "Screenshot taken" "Saved to ${file}"
+#echo -n "Screenshot saved to ${file} and copied"
