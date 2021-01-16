@@ -23,9 +23,9 @@ export MANPATH="$PREFIX/share/man:/usr/local/share/man:/usr/share/man"
 export INFODIR="$PREFIX/share/info:/usr/share/info:/usr/local/share/info"
 
 export EDITOR="vim"
-export TERMCMD="foot"
-export BROWSER="chrome"
-export PAGER=less
+export TERMCMD="footclient"
+export BROWSER="icecat"
+export PAGER="less"
 
 # Theming
 export GTK_THEME=Arc-Darker:dark
@@ -37,9 +37,9 @@ export QT_SCALE_FACTOR=1.25
 # Include other wal shell variables and such
 source ~/.cache/wal/colors.sh
 
-#[ -d ~/.local/etc/profile.d/ ] && {
-#    for f in ~/.local/etc/profile.d/*; do
-#        [ -r "$f" ] && source "$f"
-#    done
-#    unset f
-#}
+[ -d ~/.local/etc/profile.d/ ] && {
+    for f in ~/.local/etc/profile.d/*; do
+        [ -r "$f" ] && source "$f"
+    done
+    unset f
+}
