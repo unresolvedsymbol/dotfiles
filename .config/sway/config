@@ -40,7 +40,7 @@ exec swayidle \
 	resume 'swaymsg "output * dpms on"'
 
 # Notification daemon
-exec mako --background-color=$background --border-color=$color1 --text-color=$foreground
+#exec mako --background-color=$background --border-color=$color1 --text-color=$foreground
 
 # Start redshift
 exec redshift
@@ -215,12 +215,11 @@ bindsym --locked XF86MonBrightnessUp exec brightnessctl set +5%
 # Lock
 bindsym ctrl+alt+delete exec lock
 
-
 # Title bar font
 font monospace 10
 
 # Window borders
-default_border pixel 5
+default_border pixel 3
 default_floating_border normal
 
 # Disable dragging
