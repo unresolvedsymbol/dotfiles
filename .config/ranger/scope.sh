@@ -321,10 +321,13 @@ handle_mime() {
         ## Image
         image/*)
             ## Preview as text conversion
-			#img2sixel -w "${PV_WIDTH}" -h "${PV_HEIGHT}" -- "${FILE_PATH} && exit 7
-            # img2txt --gamma=0.6 --width="${PV_WIDTH}" -- "${FILE_PATH}" && exit 4
-            exiftool "${FILE_PATH}" && exit 5
-            exit 1;;
+            fuck=$(mktemp)
+            convert -- "${FILE_PATH}" "BMP3:$fuck"
+            img2txt --width="${PV_WIDTH}" --height=68 -f utf8cr -- "$fuck"
+            rm -f -- "$fuck"
+            exit 4;;
+            #img2sixel -- "${FILE_PATH}"
+            #exiftool "${FILE_PATH}" && exit 5
 
         ## Video and audio
         video/* | audio/*)

@@ -1,9 +1,11 @@
 #!/bin/sh
-# handle files with rifle otherwise use xdg (uris etc)
+# handle files with rifle otherwise use xdg (other uris etc)
 echo -n "$@" | grep -E -q "http[s]?:\/\/" &&
-	exec $BROWSER $@ 
+	exec $BROWSER --new-tab $@  # new-tab works on chromium and firefox based browsers so whatever
 
-[ -e "$@" ] && (
-	$TERMCMD $SHELL -ic "rifle $@" ||
-		/usr/bin/xdg-open $@
-	)
+#[ -e "$@" ] && (
+#	$TERMCMD $SHELL -ic "rifle $@" ||
+#		/usr/bin/xdg-open $@
+#	)
+rifle -f t $@ ||
+	/usr/bin/xdg-open $@

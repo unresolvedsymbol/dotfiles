@@ -1,3 +1,4 @@
+# vim: ts=8:sw=4
 #
 ## Variables and subprocess
 #
@@ -34,13 +35,10 @@ exec_always kdeconnect-cli --refresh
 
 # Auto lock, suspend, etc
 exec swayidle \
-    timeout 300 'lock' \
+	timeout 300 'lock' \
 	# timeout 450 'swaymsg "output * dpms off"' \
 	timeout 900 'sudo zzz' \
 	resume 'swaymsg "output * dpms on"'
-
-# Notification daemon
-#exec mako --background-color=$background --border-color=$color1 --text-color=$foreground
 
 # Start redshift
 exec redshift
@@ -52,17 +50,17 @@ exec_always foot --server
 ## Colors
 #
 
-# border        the border around the title bar
+# border	the border around the title bar
 # background	the background of the title bar
-# text		    the text color of the title bar
-# indicator     the color used to indicate where a new window will open
+# text		the text color of the title bar
+# indicator	the color used to indicate where a new window will open
 # child border	the border around the view itself
 
-# class			        border		background	    text		    indicator	child border
-client.focused		    $color0		$background		$foreground	    $color7		$background
-client.focused_inactive	$color2	    $background 	$foreground	    $color6		$color2
-client.unfocused	    $color3	    $background 	$foreground	    $color6		$color3
-#client.urgent		    #2f343a		#900000	    	$foreground	    #900000		#900000
+# class			border		background	text		indicator	child border
+client.focused		$color0		$background	$foreground	$color7		$background
+client.focused_inactive	$color2		$background 	$foreground	$color6		$color2
+client.unfocused	$color3		$background 	$foreground	$color6		$color3
+#client.urgent		#2f343a		#900000		$foreground	#900000		#900000
 
 #
 ## Shortcuts
@@ -78,8 +76,7 @@ bindsym $mod+q kill
 for_window [title="Launcher"] sticky enable, resize set 484 318, floating enable
 bindsym $mod+d exec launch Launcher launcher
 bindsym $mod+shift+d exec launch Launcher desktoplauncher
-# Alacritty currently doesn't support emoji properly...
-bindsym $mod+shift+e exec TERMCMD="termite" launch Launcher emojipicker
+bindsym $mod+shift+e exec launch Launcher emojipicker
 
 # Screenshot/screenrecord
 bindsym $mod+u exec screenshot -a
@@ -274,41 +271,38 @@ mode "Move" {
 bindsym $mod+m mode "Move"
 
 mode "ATV" {
-    # Arrow keys
-
-    bindsym $left exec adbkey /dev/input/event1 105
-    bindsym $down exec adbkey /dev/input/event1 108
-    bindsym $up exec adbkey /dev/input/event1 103
-    bindsym $right exec adbkey /dev/input/event1 106
-
-    bindsym left exec adbkey /dev/input/event1 105
-    bindsym down exec adbkey /dev/input/event1 108
-    bindsym up exec adbkey /dev/input/event1 103
-    bindsym right exec adbkey /dev/input/event1 106
-
-    # Center/Enter
-
-    bindsym next exec adbkey /dev/input/event1 353
-    bindsym semicolon exec adbkey /dev/input/event1 353
-
-    # Back
-
-    bindsym prior exec adbkey /dev/input/event1 158
+	# Arrow keys
+	bindsym $left exec adbkey /dev/input/event1 105
+	bindsym $down exec adbkey /dev/input/event1 108
+	bindsym $up exec adbkey /dev/input/event1 103
+	bindsym $right exec adbkey /dev/input/event1 106
+	
+	bindsym left exec adbkey /dev/input/event1 105
+	bindsym down exec adbkey /dev/input/event1 108
+	bindsym up exec adbkey /dev/input/event1 103
+	bindsym right exec adbkey /dev/input/event1 106
+	
+	# Center/Enter
+	bindsym next exec adbkey /dev/input/event1 353
+	bindsym semicolon exec adbkey /dev/input/event1 353
+	
+	# Back
+	bindsym prior exec adbkey /dev/input/event1 158
 	bindsym return exec adbkey /dev/input/event1 158
-
-    # Text input dialog
-
-    bindsym i mode "default"; exec $TERMCMD --title adbtext -e adbtext && swaymsg mode ATV
-
-    # Home
-
-    bindsym space exec adbkey /dev/input/event1 172
-
-    # Volume
-
-    bindsym comma exec adbkey /dev/input/event1 114
-    bindsym period exec adbkey /dev/input/event1 115
-
+	
+	# Text input dialog
+	
+	bindsym i mode "default"; exec $TERMCMD --title adbtext -e adbtext && swaymsg mode ATV
+	
+	# Home
+	
+	bindsym space exec adbkey /dev/input/event1 172
+	
+	# Volume
+	
+	bindsym comma exec adbkey /dev/input/event1 114
+	bindsym period exec adbkey /dev/input/event1 115
+	
 	bindsym escape mode "default"
 	bindsym $mod+b mode "default"
 }

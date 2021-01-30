@@ -15,9 +15,10 @@ export ANDROID_HOME="$HOME/Android/Sdk"
 export ANDROID_NDK_HOME="$ANDROID_HOME/ndk-bundle"
 export DEVKITPPC=/opt/devkitpro/devkitPPC
 export WUT_ROOT=/opt/devkitpro/wut
+export VITASDK="$PREFIX/opt/vitasdk"
 
 export PBL_TOOL_PATH="$HOME/pebble-dev/pebble-sdk-4.5-linux64/bin"
-export PATH="$PBL_TOOL_PATH:$PREFIX/sbin:$PREFIX/bin:$PATH:$ANDROID_HOME/platform-tools:$ANDROID_NDK_HOME:$HOME/go/bin:$DEVKITPRO/tools/bin:$DEVKITARM/bin"
+export PATH="$PBL_TOOL_PATH:$PREFIX/sbin:$PREFIX/bin:$PATH:$ANDROID_HOME/platform-tools:$ANDROID_NDK_HOME:$HOME/go/bin:$DEVKITPRO/tools/bin:$DEVKITARM/bin:$VITASDK/bin"
 #export LIBRARY_PATH="$HOME:/.local/lib64:$PREFIX/lib:/usr/local/lib:/usr/lib"
 export MANPATH="$PREFIX/share/man:/usr/local/share/man:/usr/share/man"
 export INFODIR="$PREFIX/share/info:/usr/share/info:/usr/local/share/info"

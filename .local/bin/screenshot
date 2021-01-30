@@ -19,12 +19,12 @@ path="$HOME/Pictures/Screenshots"
 recordingPath="$HOME/Videos"
 
 while getopts "rcawdo" opt; do
-    case ${opt} in
+    case $opt in
         # Recording
         r) 
         pid=$(pgrep -ox wf-recorder)
         [ "$pid" ] && {
-            file=$(cut -d '' -f5 /proc/${pid}/cmdline)
+            file=$(cut -d '' -f6 /proc/${pid}/cmdline)
             echo $pid
             kill -s 2 $pid &&
             notify-send -u low -t 5000 "Recording finished" "Saved to $file"
@@ -58,21 +58,28 @@ cd "$path"
 file="${prefix}_$(date +%Y-%m-%d-%H%m%S)$(echo _$geo | cut -d' ' -f2 | sed 's/_$//').${output}"
 
 [ "$record" ] && {
-    (test -n "$geo" && wf-recorder -g "$geo" -f $file || wf-recorder -o "$(swaymsg -t get_outputs | jq -r '.[] | select(.focused==true).name')" -f $file) & >/dev/null;
+    opts="--audio -f $file -c libx265 -p crf=28 -d /dev/dri/renderD128"
+    test -n "$geo" &&
+        opts+="-g \"$geo\"" ||
+        opts+="-o \"$(swaymsg -t get_outputs | jq -r '.[] | select(.focused==true).name')\""
+    echo "wf-recorder ops: $opts"
+    apulse wf-recorder $opts
+    #(test -n "$geo" && apulse wf-recorder $opts -g "$geo" || apulse wf-recorder -o "$(swaymsg -t get_outputs | jq -r '.[] | select(.focused==true).name')" $opts) & disown #>/dev/null 2>&1 & disown
     notify-send -u low -t 3000 "Recording started"
     echo "Recording started in background, run again to stop."
     exit
 }
 
 # TODO: Simplify (works fine in zsh, not posix shell)
-test -n "$geo" && echo $geo | grim -g - -t $output $file ||
-grim $cursor -t $output $file
+test -n "$geo" &&
+    echo $geo | grim -g - -t $output $file ||
+    grim $cursor -t $output $file
 
 [ ! "$record" ] && [ $ocr ] && {
     tesseract ${file} ${file}.txt
     cat ${file}.txt | tr -d '\n\f' | wl-copy
 } || cat ${file} | wl-copy -t $(file -b --mime-type ${file})
 
-(aplay $HOME/.config/CaptureSound.wav &) 2>/dev/null
+aplay -q ~/.config/CaptureSound.wav
 notify-send -u low -t 5000 "Screenshot taken" "Saved to ${file}"
 #echo -n "Screenshot saved to ${file} and copied"

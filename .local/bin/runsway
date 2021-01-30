@@ -7,5 +7,10 @@ export QT_QPA_PLATFORM=wayland-egl # Problematic occasionally
 export QT_WAYLAND_DISABLE_WINDOWDECORATION=1
 #export QT_WAYLAND_FORCE_DPI=physical
 export QT_SCALE_FACTOR=1.25
-RUST_BACKTRACE=1 sway -d > ~/.swaylog 2>&1 || cp ~/.swaylog ~/swaycrash_"$(date +%Y-%m-%d-%H%m%S)"
+# tray fix ig
+export XDG_CURRENT_DESKTOP=Unity
+export XDG_SESSION_TYPE=wayland
+# debug shit
+#RUST_BACKTRACE=1 sway -d > ~/.swaylog 2>&1 || cp ~/.swaylog ~/swaycrash_"$(date +%Y-%m-%d-%H%m%S)"
+sway
 termfix "$(tty)"
