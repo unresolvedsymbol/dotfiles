@@ -1,7 +1,7 @@
 #alias ls="ls --color=auto"
 #alias l="ls -alFh"
 #alias la="ls -a"
-
+# bloat? maybe
 alias ls="exa --color=auto --group-directories-first"
 alias la="exa -a --color=auto --group-directories-first"
 alias l="exa -l --color=auto --group-directories-first"
@@ -14,10 +14,14 @@ alias fgrep="fgrep --color=auto"
 # I use these mainly for auto complete as it doesn't work with tuxc, etc
 alias xq="xbps-query --regex -R -s"
 alias xf="xbps-query -f"
-alias xi="sudo -E xbps-install"
-alias xr="sudo -E xbps-remove -R"
-alias xu="sudo -E xbps-install -Su"
-alias xa="sudo -E xbps-alternatives"
+alias xi="doas xbps-install"
+alias xr="doas xbps-remove -R"
+alias xu="doas xbps-install -Su"
+alias xa="doas xbps-alternatives"
+
+# pip, upgrade all packages (note may break projects requiring specific versions, not sure)
+# https://stackoverflow.com/a/3452888
+alias piplup="pip list --outdated --format=freeze | grep -v '^\-e' | cut -d = -f 1  | xargs -n1 pip install -U"
 
 # Apply PREFIX to cmake
 alias cmake="cmake -DCMAKE_INSTALL_PREFIX=$PREFIX"
@@ -48,16 +52,16 @@ clipfile () {
 	wl-copy -t $(file -b --mime-type "$1") < "$1"
 }
 
-ircnick=$USER
+IRCNICK=$USER
 
-alias freenode="sic -h irc.freenode.net -n $ircnick"
-alias rizon="sic -h irc.rizon.net -n $ircnick"
+alias freenode="sic -h irc.freenode.net -n $IRCNICK"
+alias rizon="sic -h irc.rizon.net -n $IRCNICK"
 
 alias hexdump="hexdump --color=auto"
 alias hack="hexdump -C /dev/urandom | grep 'be ef'"
 alias rot13="tr 'A-Za-z' 'N-ZA-Mn-za-m'"
 alias v="$EDITOR"
-alias vv="sudo -E $EDITOR" # Preserve enviornment for editor configuration
+alias vv="doas env HOME=$HOME LANG=$LANG $EDITOR" # Preserve enviornment for editor configuration
 alias netstat="lsof -i" # Sort of
 
 alias lsbig="du -chsx *(D) 2>/dev/null | sort -rh"

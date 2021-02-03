@@ -34,16 +34,17 @@ _comp_options+=(globdots)
 #
 
 [[ $(tty) =~ tty ]] && {
-	source ~/.cache/wal/colors-tty.sh
+	[ -e ~/.cache/wal/colors-tty.sh ] && source ~/.cache/wal/colors-tty.sh
 
 	# Replace caps with escape (requires you to setuid the loadkeys binary)
-	sudo loadkeys <<<"keycode 58 = Escape"
+	loadkeys <<<"keycode 58 = Escape"
 
 	# Hotfix
 	true
 } || {
-	(cat ~/.cache/wal/sequences &) # Set wal colors, you may not want this on terminals that already have wal includes as I've had it break background transparency before on urxvt
+	[ -e ~/.cache/wal/sequences ] && (cat ~/.cache/wal/sequences &) # Set wal colors, you may not want this on terminals that already have wal includes as I've had it break background transparency before on urxvt
 
+	# Lazy powerlevel9k legacy variables (pl11k eat wen)
 	POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(
 		dir
 		dir_writable

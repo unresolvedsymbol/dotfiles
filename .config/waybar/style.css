@@ -43,7 +43,7 @@ window#waybar {
 	margin: 0 5px;
 }
 
-#clock, #custom-weather, #custom-redshift, #custom-bulb, #custom-alsa, #battery, #cpu, #memory, #temperature, #backlight, #network:not(.disconnected), #pulseaudio, #custom-media, #tray, #idle_inhibitor, #custom-vpn, #custom-disk, #custom-shmus, #custom-bluetooth, #custom-recording, #custom-reisub {
+#clock, #custom-weather, #custom-redshift, #custom-bulb, #custom-alsa, #battery, #cpu, #memory, #temperature, #backlight, #network:not(.disconnected), #pulseaudio, #custom-media, #tray, #idle_inhibitor, #custom-vpn, #custom-disk, #custom-shmus, #custom-bluetooth, #custom-recording {
 	/* top right bottom left */
 	/* top/bottom left/right */
 

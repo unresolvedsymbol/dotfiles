@@ -3,8 +3,8 @@
 ## Variables and subprocess
 #
 
-# Super key
-set $mod Mod1
+# Super key: I "xkb_options altwin:swap_lalt_lwin" with my keyboard in my config.d to prevent conflicts with app menu bars and for tmux convenience (I can bind alt but not win)
+set $mod Mod4
 
 # Terminal
 set $term footclient
@@ -35,9 +35,9 @@ exec_always kdeconnect-cli --refresh
 
 # Auto lock, suspend, etc
 exec swayidle \
-	timeout 300 'lock' \
-	# timeout 450 'swaymsg "output * dpms off"' \
-	timeout 900 'sudo zzz' \
+	timeout 300 'LOCK=1 lock' \
+	timeout 450 'swaymsg "output * dpms off"' \
+	timeout 900 'doas zzz' \
 	resume 'swaymsg "output * dpms on"'
 
 # Start redshift
@@ -112,7 +112,7 @@ bindsym $mod+shift+$right move right
 
 #
 ## Workspaces
-#
+#-r 
 
 bindsym $mod+1 workspace 1
 bindsym $mod+2 workspace 2
@@ -227,7 +227,7 @@ tiling_drag disable
 #
 
 # Lock and suspend on lid close
-bindswitch --locked lid:on exec sh -c "swaylock -f --indicator-radius 80 -c 000000; [ ! -e \"/tmp/.locked\" ] && sudo zzz"
+bindswitch --locked lid:on exec sh -c "LOCK=1 lock; doas zzz"
 
 #
 ## Modes
@@ -270,47 +270,6 @@ mode "Move" {
 
 bindsym $mod+m mode "Move"
 
-mode "ATV" {
-	# Arrow keys
-	bindsym $left exec adbkey /dev/input/event1 105
-	bindsym $down exec adbkey /dev/input/event1 108
-	bindsym $up exec adbkey /dev/input/event1 103
-	bindsym $right exec adbkey /dev/input/event1 106
-	
-	bindsym left exec adbkey /dev/input/event1 105
-	bindsym down exec adbkey /dev/input/event1 108
-	bindsym up exec adbkey /dev/input/event1 103
-	bindsym right exec adbkey /dev/input/event1 106
-	
-	# Center/Enter
-	bindsym next exec adbkey /dev/input/event1 353
-	bindsym semicolon exec adbkey /dev/input/event1 353
-	
-	# Back
-	bindsym prior exec adbkey /dev/input/event1 158
-	bindsym return exec adbkey /dev/input/event1 158
-	
-	# Text input dialog
-	
-	bindsym i mode "default"; exec $TERMCMD --title adbtext -e adbtext && swaymsg mode ATV
-	
-	# Home
-	
-	bindsym space exec adbkey /dev/input/event1 172
-	
-	# Volume
-	
-	bindsym comma exec adbkey /dev/input/event1 114
-	bindsym period exec adbkey /dev/input/event1 115
-	
-	bindsym escape mode "default"
-	bindsym $mod+b mode "default"
-}
-
-for_window [title="adbtext"] floating enable, sticky enable, resize set 444 90
-
-bindsym $mod+b mode "ATV"
-
 bindsym $mod+comma exec adbkey /dev/input/event1 114
 bindsym $mod+period exec adbkey /dev/input/event1 115
 
@@ -332,6 +291,7 @@ for_window [class="URxvt"] opacity 0.95
 # $TERMCMD -a tty-clock tty-clock -tBC1
 for_window [app_id="tty-clock"] floating enable, resize set 260 130, move absolute position 3580 945
 for_window [app_id="floating"] floating enable
+for_window [app_id="visualizer"] opacity 1, border none 
 
 # Hide wl-clipboard fake window
 for_window [title="wl-clipboard"] floating enable

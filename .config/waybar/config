@@ -9,7 +9,7 @@
 	"margin": "2 2 0 2",
 	"modules-left": ["sway/workspaces", "sway/mode", "sway/window"],
 	"modules-center": [],
-	"modules-right": ["custom/weather", "custom/shmus", "custom/recording", "custom/alsa", "network", "custom/bluetooth", "custom/vpn", "custom/disk", "cpu", "memory", "temperature", "backlight", "custom/bulb", "battery", "clock", "tray", "idle_inhibitor", "custom/reisub"],
+	"modules-right": ["custom/weather", "custom/shmus", "custom/recording", "custom/alsa", "network", "custom/bluetooth", "custom/vpn", "custom/disk", "cpu", "memory", "temperature", "backlight", "custom/bulb", "battery", "tray", "clock", "idle_inhibitor"],
 	"sway/workspaces": {
 		"format": "{icon}",
 		// Roman numeral indicators
@@ -169,10 +169,6 @@
 		"format": "      ",
 		"interval": 3,
 		"tooltip": false
-	},
-	"custom/reisub": {
-		"interval": 900,
-		"format": "REISUB"
 	},
 	"custom/pid": {
 		"exec": "swaymsg -t get_tree | jq -r '.. | objects | select(.focused==true).pid'",

@@ -9,7 +9,7 @@
 * XDG replaced with rifle for files, uses $BROWSER for links
 * Cross compatible login shell profiles (theoretically at least)
 * Vanilla zsh configuration (OMZ is slow) with powerlevel10k, vim binds, mode indicators, and somewhat long hist file (<em>Sometimes I forget an obscure command I write once in a while</em>)
-* Caps and escape swapped in sway and even vts! (<em>Set in zshrc, requires loadkeys nopasswd in sudo; security implications unknown</em>)
+* Caps and escape swapped in sway and even vts! (<em>Set in zshrc, requires loadkeys setuid: security implications unknown</em>)
 * Exa for ls (<em>Just cause</em>)
 * Quick XBPS alias (<em>Also zsh only</em>)
 * CMake projects auto install to local prefix (<em>so you don't have to sudo make install every goddamn program</em>)

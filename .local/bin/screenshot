@@ -24,7 +24,7 @@ while getopts "rcawdo" opt; do
         r) 
         pid=$(pgrep -ox wf-recorder)
         [ "$pid" ] && {
-            file=$(cut -d '' -f6 /proc/${pid}/cmdline)
+            file=$(cut -d '' -f4 /proc/${pid}/cmdline)
             echo $pid
             kill -s 2 $pid &&
             notify-send -u low -t 5000 "Recording finished" "Saved to $file"
@@ -41,7 +41,7 @@ while getopts "rcawdo" opt; do
                 echo "Selection cancelled."
                 notify-send -u low -t 1500 "Selection cancelled"   
                 exit 1
-            };; # TODO: Fix slurp using escape over shift when rebound in sway xkb_options
+            };;
         # Window screenshot
         w) geo=$(swaymsg -t get_tree | jq -r '.. | objects | select(.focused==true) | "\(.rect.x),\(.rect.y) \(.rect.width)x\(.rect.height)"');;
         # Display screenshot
@@ -57,16 +57,18 @@ cd "$path"
 
 file="${prefix}_$(date +%Y-%m-%d-%H%m%S)$(echo _$geo | cut -d' ' -f2 | sed 's/_$//').${output}"
 
+# TODO: Make record audio from pure ALSA, most of the simple screen recordings I do don't need it though
 [ "$record" ] && {
-    opts="--audio -f $file -c libx265 -p crf=28 -d /dev/dri/renderD128"
+    opts="--audio -f $file -c libx265 -p crf=28 -d /dev/dri/renderD128 "
+    # Select region: geometry or display
     test -n "$geo" &&
         opts+="-g \"$geo\"" ||
         opts+="-o \"$(swaymsg -t get_outputs | jq -r '.[] | select(.focused==true).name')\""
-    echo "wf-recorder ops: $opts"
-    apulse wf-recorder $opts
-    #(test -n "$geo" && apulse wf-recorder $opts -g "$geo" || apulse wf-recorder -o "$(swaymsg -t get_outputs | jq -r '.[] | select(.focused==true).name')" $opts) & disown #>/dev/null 2>&1 & disown
+    echo "Recording options: $opts"
+    wf-recorder $opts & # apulse doesn't work, weird cause it did for Discord (audio input)
     notify-send -u low -t 3000 "Recording started"
     echo "Recording started in background, run again to stop."
+    disown
     exit
 }
 

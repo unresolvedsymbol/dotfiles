@@ -1,11 +1,14 @@
 #!/bin/bash
 
-[ $(id -u) -eq 0 ] && echo "Don't lock as root" && exit 1
+[ $(id -u) -eq 0 ] && (echo "Don't lock as root"; exit 1)
+
+[ -e ~/.cache/wal/colors.sh ] && . ~/.cache/wal/colors.sh
 
 locker="$(mktemp --suffix=.png)"
 
-grim $locker
-[ "$1" ] && cp $(awk 'NR == 1 { print $3 }' .cache/wal/colors-sway) $locker || {
+# Race condition where taking a screenshot and running imagemagick takes too long before the laptop sleeps, and locks a few seconds after waking up (leaving a time window where an attacker could view sensitive information or badusb a terminal)
+[ "$LOCK" ] && cp $wallpaper $locker || {
+	grim $locker
 	textwidth=469
 	textheight=47
 	

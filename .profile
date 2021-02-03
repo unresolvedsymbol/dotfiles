@@ -36,7 +36,7 @@ export QT_AUTO_SCREEN_SCALE_FACTOR=1
 export QT_SCALE_FACTOR=1.25
 
 # Include other wal shell variables and such
-source ~/.cache/wal/colors.sh
+[ -e ~/.cache/wal/colors.sh ] && source ~/.cache/wal/colors.sh
 
 [ -d ~/.local/etc/profile.d/ ] && {
     for f in ~/.local/etc/profile.d/*; do

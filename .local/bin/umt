@@ -1,15 +1,19 @@
 #!/bin/sh
 for x in "$@"; do
-	mnt=$(findmnt "$x" -J) || {
+	mnt=$(findmnt -J -- "$x") || {
 		echo "Can't find mount $x!"
 		continue
 	}
 
-	[ '$(echo "$mnt" | jq -r ".[][0].fstype" | cut -d\. -f1)' = "fuse" ] &&
-		echo "FUSE detected" &&
-		fusermount -u '$(echo "$mnt" | jq -r ".[][0].target")' &&	
-		exit 0
+	jq -r '.[][0].fstype' <<< "$mnt" | grep -q '^fuse\.' && {
+		echo "FUSE detected"
+		#fusermount -u "$(jq -r '.[][0].target' <<< \"$mnt\")"
+		fusermount -u "$x" && echo "Unmounted $x" || "Failed to unmount $x"
+		continue
+	}
 
-	block=$(echo "$mnt" | jq -r '.[][0].source')
-	udisksctl unmount -b "$block" || (sudo umount "$block" && echo "Unmounted $x.") || echo "Failed to unmount $x."
+	block=$(jq -r '.[][0].source' <<< "$mnt" )
+	udisksctl unmount -b "$block" ||
+		(doas umount "$block" && echo "Unmounted $x via root") ||
+		echo "Failed to unmount $x"
 done
