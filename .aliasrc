@@ -2,22 +2,25 @@
 #alias l="ls -alFh"
 #alias la="ls -a"
 # bloat? maybe
-alias ls="exa --color=auto --group-directories-first"
-alias la="exa -a --color=auto --group-directories-first"
-alias l="exa -l --color=auto --group-directories-first"
-alias l.="exa -ad --color=auto --group-directories-first .*"
+alias exa="exa --color=auto --group-directories-first"
+alias ls="exa"
+alias la="exa -a"
+alias l="exa -l"
+alias l.="exa -ad .*"
+alias ll="exa -la"
 
 alias grep="grep --color=auto"
 alias egrep="egrep --color=auto"
 alias fgrep="fgrep --color=auto"
 
 # I use these mainly for auto complete as it doesn't work with tuxc, etc
-alias xq="xbps-query --regex -R -s"
-alias xf="xbps-query -f"
-alias xi="doas xbps-install"
-alias xr="doas xbps-remove -R"
-alias xu="doas xbps-install -Su"
-alias xa="doas xbps-alternatives"
+alias xq="xbps-query -R" # Show package details
+alias xs="xbps-query -Rs" # Search for package
+alias xf="xbps-query -f" # Show files from package
+alias xi="doas xbps-install" # Install package
+alias xr="doas xbps-remove -R" # Purge package
+alias xu="doas xbps-install -Su" # Full system upgrade
+alias xa="doas xbps-alternatives" # Alternatives
 
 # pip, upgrade all packages (note may break projects requiring specific versions, not sure)
 # https://stackoverflow.com/a/3452888
@@ -45,9 +48,6 @@ ixio () {
 	curl -F "f:1=@$1" ix.io
 }
 
-# Generate ASCII new-browserhax QR code :)
-alias nbhax="ifconfig wlp3s0 | sed -En 's/127.0.0.1//;s/.*inet (addr:)?(([0-9]*\.){3}[0-9]*).*/http:\/\/\2\/nbhax.html/p' | qrencode -t asciii -o -"
-
 clipfile () {
 	wl-copy -t $(file -b --mime-type "$1") < "$1"
 }
@@ -65,7 +65,7 @@ alias vv="doas env HOME=$HOME LANG=$LANG $EDITOR" # Preserve enviornment for edi
 alias netstat="lsof -i" # Sort of
 
 alias lsbig="du -chsx *(D) 2>/dev/null | sort -rh"
-alias dupes="find . ! -empty -type f -exec md5sum {} + | sort | uniq -w32 -dD" # Find duplicates
+alias dupes="find . ! -empty -type f -exec md5sum {} + | sort | uniq -w32 -d" # Find duplicates
 alias fid="grep -Irn" # Recursively find a pattern in a directory (eg. fid stdio someprojectdir)
 
 alias mnt="udisksctl mount -b"
@@ -96,6 +96,7 @@ alias gcl="git clone"
 alias gcm="git commit"
 alias gpl="git pull"
 alias gpu="git push"
+alias gst="git status"
 
 alias mosh="mosh --no-ssh-pty"
 
@@ -103,3 +104,7 @@ how() { # Extremely useful service (eg. how sed print only matching lines)
 	where="$1"; shift
 	IFS=+ curl "https://cht.sh/$where/ $*"
 } 
+
+usbttl() {
+	screen /dev/ttyUSB0 115200,cs8
+}

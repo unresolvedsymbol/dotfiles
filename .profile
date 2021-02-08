@@ -29,7 +29,6 @@ export BROWSER="icecat"
 export PAGER="less"
 
 # Theming
-export GTK_THEME=Arc-Darker:dark
 export QT_STYLE_OVERRIDE=kvantum
 export QT_AUTO_SCREEN_SCALE_FACTOR=1
 # Equalize GDK-QT font scale..? Why does this need to be done?

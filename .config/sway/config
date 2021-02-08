@@ -34,11 +34,15 @@ exec_always xrdb -I$HOME ~/.Xresources
 exec_always kdeconnect-cli --refresh
 
 # Auto lock, suspend, etc
+# !!! If you get blackscreens then disable the second and fourth swayidle commands
 exec swayidle \
 	timeout 300 'LOCK=1 lock' \
 	timeout 450 'swaymsg "output * dpms off"' \
-	timeout 900 'doas zzz' \
+	timeout 900 'doas zzz'
 	resume 'swaymsg "output * dpms on"'
+# Resume only works on systemd apparently, up to you to setup an /etc/acpi/handler.sh or /etc/zzz.d/resume hook to run dpms on if you don't have systemd (void doesn't)
+# Something like:
+# for sock in /home/*/.cache/xdgr/sway-ipc.*.sock; do swaymsg -s $sock 'output * dpms on'; done
 
 # Start redshift
 exec redshift

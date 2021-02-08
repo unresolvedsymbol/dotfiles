@@ -9,7 +9,7 @@
 	"margin": "2 2 0 2",
 	"modules-left": ["sway/workspaces", "sway/mode", "sway/window"],
 	"modules-center": [],
-	"modules-right": ["custom/weather", "custom/shmus", "custom/recording", "custom/alsa", "network", "custom/bluetooth", "custom/vpn", "custom/disk", "cpu", "memory", "temperature", "backlight", "custom/bulb", "battery", "tray", "clock", "idle_inhibitor"],
+	"modules-right": ["custom/shortcuts", "custom/mpris", "custom/shmus", "custom/alsa", "custom/bluetooth", "network", "custom/recording", "custom/vpn", "custom/disk", "cpu", "memory", "temperature", "backlight", "battery", "tray", "clock", "idle_inhibitor"],
 	"sway/workspaces": {
 		"format": "{icon}",
 		// Roman numeral indicators
@@ -95,7 +95,7 @@
 		"format-wifi": " {essid} ({signalStrength}%) [{ipaddr}]",
 		"format-ethernet": " {ifname}: [{ipaddr}]",
 		"format-disconnected": "",
-		"tooltip": false,
+		"tooltip": true,
 		"interval": 5
 	},
 	"pulseaudio": {
@@ -122,14 +122,21 @@
 		"exec": "shmus list --current | awk 'length > 40{$0=substr($0,0,41)\"...\"}1'",
 		"exec-if": "test $(ps hos $(cat ~/.cache/shmus/track)) != T", // Only show if playing
 		"exec-if": "test -f ~/.cache/shmus/track",
-		"interval": 5,
+		"interval": 6,
 		"signal": 9,
+		"tooltip": false
+	},
+	"custom/mpris": {
+		"exec": "playerctl metadata title",
+		"format": "\uf144 {}",
+		"interval": 6,
 		"tooltip": false
 	},
 	"custom/redshift": {
 		"exec": "test -r ~/.temperature && echo $(cat ~/.temperature)K",
 		"format": " {}",
-		"interval": 1,
+		"interval": 15,
+		"signal": 12,
 		"tooltip": false
 	},
 	"custom/bulb": {
@@ -141,7 +148,7 @@
 		"tooltip": false
 	},
 	"custom/shortcuts": {
-		"exec": "awk -F, '{printf((NR>1?\" | \":\"\")toupper($1)\": \"$2\"	\")}' ~/.config/shortcuts",
+		"exec": "awk -F, '{printf((NR>1?\" | \":\"\")toupper($1)\": \"$2)}' ~/.config/shortcuts",
 		"tooltip": false
 	},
 	"custom/vpn": {

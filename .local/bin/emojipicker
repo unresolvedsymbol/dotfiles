@@ -1,7 +1,11 @@
 #!/bin/sh
 emote=$(cat ~/.emoji | fzf | cut -d' ' -f1)
+#swaymsg -- "echo -n '$emote' | wl-copy --primary -f"
+# todo fix wtf, keeps not forking and leaving the terminal open
+exit
 [ "$emote" ] && {
-    echo -n $emote | xclip -i -selection clipboard
-    echo -n $emote | wl-copy
-    echo -n $emote | wl-copy --primary
+    #xclip -i -selection clipboard <<< "$emote"
+    #echo -n "$emote" | exec wl-copy & disown
+    #echo "$emote" 
+    #read
 }

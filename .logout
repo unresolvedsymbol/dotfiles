@@ -1,0 +1,2 @@
+# cleanup like systemd would've
+rm -rf $XDG_RUNTIME_DIR/* $XDG_RUNTIME_DIR/.* # *sigh* why would I have to enable dotglob

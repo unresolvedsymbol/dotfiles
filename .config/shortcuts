@@ -1,4 +1,4 @@
-p,,firefox-wayland
+p,,$BROWSER
 t,,urxvt -e ranger
-n,,term -e newsboat
-o,,term -e neomutt
+n,,$TERMCMD newsboat
+o,,$TERMCMD neomutt
