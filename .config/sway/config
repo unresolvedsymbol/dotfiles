@@ -19,10 +19,11 @@ set $right l
 include ~/.cache/wal/colors-sway
 
 # Swaynag colors
-#swaynag_command "swaynag -c ~/.cache/wal/colors-swaynag"
+swaynag_command "swaynag -c ~/.cache/wal/colors-swaynag"
 
 # Oguri
-#swaybg_command "oguri-swaybg"
+#swaybg_command -
+#exec oguri
 
 # Set wallpaper
 output * bg "$wallpaper" fill
@@ -37,9 +38,9 @@ exec_always kdeconnect-cli --refresh
 # !!! If you get blackscreens then disable the second and fourth swayidle commands
 exec swayidle \
 	timeout 300 'LOCK=1 lock' \
-	timeout 450 'swaymsg "output * dpms off"' \
-	timeout 900 'doas zzz'
-	resume 'swaymsg "output * dpms on"'
+	#timeout 450 'swaymsg "output * dpms off"' \
+	timeout 900 'doas zzz' #\
+	#resume 'swaymsg "output * dpms on"'
 # Resume only works on systemd apparently, up to you to setup an /etc/acpi/handler.sh or /etc/zzz.d/resume hook to run dpms on if you don't have systemd (void doesn't)
 # Something like:
 # for sock in /home/*/.cache/xdgr/sway-ipc.*.sock; do swaymsg -s $sock 'output * dpms on'; done
@@ -81,6 +82,7 @@ for_window [title="Launcher"] sticky enable, resize set 484 318, floating enable
 bindsym $mod+d exec launch Launcher launcher
 bindsym $mod+shift+d exec launch Launcher desktoplauncher
 bindsym $mod+shift+e exec launch Launcher emojipicker
+#bindsym $mod+shift+m exec launch Launcher mpvplay
 
 # Screenshot/screenrecord
 bindsym $mod+u exec screenshot -a
@@ -273,9 +275,6 @@ mode "Move" {
 }
 
 bindsym $mod+m mode "Move"
-
-bindsym $mod+comma exec adbkey /dev/input/event1 114
-bindsym $mod+period exec adbkey /dev/input/event1 115
 
 bar {
 	swaybar_command waybar

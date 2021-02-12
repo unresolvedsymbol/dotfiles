@@ -10,8 +10,8 @@ export LD_LIBRARY_PATH="$PREFIX/lib:/usr/local/lib:/usr/lib:$LD_LIBRARY_PATH"
 
 HISTFILE="$HOME/.zsh_history"
 
-HISTSIZE=5000
-SAVEHIST=1000
+HISTSIZE=15000
+SAVEHIST=10000
 
 setopt extended_history		  # record timestamp of command in HISTFILE
 setopt hist_expire_dups_first # delete duplicates first when HISTFILE size exceeds HISTSIZE

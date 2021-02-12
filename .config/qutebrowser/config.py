@@ -8,7 +8,8 @@ import os
 # Dark themes default
 c.url.searchengines = {'DEFAULT':'https://searx.neocities.org/?q={}&oscar-style=logicodev-dark', 'sp':'https://www.startpage.com/do/search?q={}&prfe=e1b7bfc323f62c2f0a16735a739a301749d41e8058f6b43eec953990503fbfd7d7b7f836b6e4d3f5a4545511daa5b5401ffedb00154351b582cbbf5c8e68b65a8fb6b18b94f3b6f307070b936503f2341212', 'yt':'https://www.youtube.com/results?search_query={}'}
 # Disable homepage
-c.url.start_pages = ['file:///home/void/.home.html']
+#c.url.start_pages = ['file:///home/void/.home.html']
+c.url.start_pages = ['about:blank']
 # Disable new tab page
 c.url.default_page = 'about:blank'
 # Use UTF-8

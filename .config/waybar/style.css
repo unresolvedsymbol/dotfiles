@@ -1,4 +1,4 @@
-@import url('/home/void/.cache/wal/waybar.css');
+@import "../../.cache/wal/waybar.css";
 
 * {
 	border: none;
