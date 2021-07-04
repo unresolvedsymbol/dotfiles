@@ -1,14 +1,18 @@
 #!/bin/sh
+export MOZ_ENABLE_WAYLAND=
 export SDL_VIDEODRIVER=wayland
 # breaks some apps
 export GDK_BACKEND=wayland
 export _JAVA_AWT_WM_NONREPARENTING=1 # Fix for some java stuff on wl
-export QT_QPA_PLATFORM=wayland-egl # Problematic occasionally
+#export QT_QPA_PLATFORM=wayland-egl # Problematic occasionally
+export QT_QPA_PLATFORM=wayland
 export QT_WAYLAND_DISABLE_WINDOWDECORATION=1
 #export QT_WAYLAND_FORCE_DPI=physical
 export QT_SCALE_FACTOR=1.25
 export XDG_SESSION_TYPE=wayland
+export XDG_CURRENT_DESKTOP=Sway
+export XDG_SESSION_DESKTOP=sway
 # debug shit
-#RUST_BACKTRACE=1 sway -d > ~/.swaylog 2>&1 || cp ~/.swaylog ~/swaycrash_"$(date +%Y-%m-%d-%H%m%S)"
-sway
-termfix "$(tty)"
+RUST_BACKTRACE=1 sway -d > ~/.swaylog 2>&1 || cp ~/.swaylog ~/swaycrash_"$(date +%Y-%m-%d-%H%m%S)"
+#sway
+exec termfix "$(tty)"

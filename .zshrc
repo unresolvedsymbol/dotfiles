@@ -3,11 +3,6 @@
 #
 #
 
-# Help
-export LD_LIBRARY_PATH="$PREFIX/lib:/usr/local/lib:/usr/lib:$LD_LIBRARY_PATH"
-# You need to add a file in /etc/ld.so.conf.d/ with this path $PREFIX/lib 
-# But for some fucking reason ldconfig won't do it's motherfucking job
-
 HISTFILE="$HOME/.zsh_history"
 
 HISTSIZE=15000

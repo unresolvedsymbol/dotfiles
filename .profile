@@ -7,14 +7,17 @@ export PREFIX="$HOME/.local" # Install local programs, libraries, etc in your ho
 #export PKG_CONFIG_PATH="$PREFIX/lib64/pkgconfig:$PREFIX/lib/pkgconfig:$PREFIX/share/pkgconfig:/usr/local/share/pkgconfig:/usr/share/pkgconfig"
 #export C_INCLUDE_PATH="$PREFIX/include:/usr/local/include:/usr/include"
 
-export _JAVA_AWT_WM_NONREPARENTING=1
-export MOZ_ENABLE_WAYLAND=
-export TOR_CONTROL_PASSWD=$'"L[f6Rg_vU=dkqP\'F{3@?;y"'
+# Help
+# PROBLEMATIC FOR APPIMAGES MOSTLY run with "env -u LD_LIBRARY_PATH ./your-app-image"
+export LD_LIBRARY_PATH="$PREFIX/lib:/usr/local/lib:/usr/lib:$LD_LIBRARY_PATH"
+# You typically are supposed to add a file in /etc/ld.so.conf.d/ with this path $PREFIX/lib 
+# But for some fucking reason ldconfig won't do it's motherfucking job
+
 export ANDROID_JAVA_HOME="$JAVA_HOME"
 export ANDROID_HOME="$HOME/Android/Sdk"
 export ANDROID_NDK_HOME="$ANDROID_HOME/ndk-bundle"
-export DEVKITPPC=/opt/devkitpro/devkitPPC
-export WUT_ROOT=/opt/devkitpro/wut
+export DEVKITPPC="/opt/devkitpro/devkitPPC"
+export WUT_ROOT="/opt/devkitpro/wut"
 export VITASDK="$PREFIX/opt/vitasdk"
 
 export PBL_TOOL_PATH="$HOME/pebble-dev/pebble-sdk-4.5-linux64/bin"
@@ -25,7 +28,7 @@ export INFODIR="$PREFIX/share/info:/usr/share/info:/usr/local/share/info"
 
 export EDITOR="vim"
 export TERMCMD="footclient"
-export BROWSER="icecat"
+export BROWSER="firefox"
 export PAGER="less"
 
 # Theming

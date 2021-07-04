@@ -23,7 +23,7 @@ window#waybar {
 }
 
 #workspaces button.focused {
-    background: @color3;
+	background: @color3;
 	border-bottom: 3px solid @color1;
 }
 
@@ -53,10 +53,10 @@ window#waybar {
 }
 
 #custom-shortcuts {
-    background-color: @color4;
-    color: #000000;
-    margin: 0 8px;
-    padding: 0 10px;
+	background-color: @color4;
+	color: #000000;
+	margin: 0 8px;
+	padding: 0 10px;
 }
 
 #battery.warning:not(.charging), #cpu.warning, #memory.warning {

@@ -4,12 +4,11 @@
 {
 	"layer": "top",
 	"position": "top",
-	"output": "eDP-1",
 	"height": 36,
 	"margin": "2 2 0 2",
-	"modules-left": ["sway/workspaces", "sway/mode", "sway/window"],
+	"modules-left": ["sway/workspaces", "sway/mode"],
 	"modules-center": [],
-	"modules-right": ["custom/shortcuts", "custom/mpris", "custom/shmus", "custom/alsa", "custom/bluetooth", "network", "custom/recording", "custom/vpn", "custom/disk", "cpu", "memory", "temperature", "backlight", "battery", "tray", "clock", "idle_inhibitor"],
+	"modules-right": ["custom/shortcuts", "custom/alsa", "custom/bluetooth", "network", "custom/recording", "custom/vpn", "custom/disk", "cpu", "memory", "temperature", "backlight", "battery", "tray", "clock", "idle_inhibitor"],
 	"sway/workspaces": {
 		"format": "{icon}",
 		// Roman numeral indicators
@@ -95,7 +94,7 @@
 		"format-wifi": " {essid} ({signalStrength}%) [{ipaddr}]",
 		"format-ethernet": " {ifname}: [{ipaddr}]",
 		"format-disconnected": "",
-		"tooltip": true,
+		"tooltip": false,
 		"interval": 5
 	},
 	"pulseaudio": {
@@ -129,6 +128,7 @@
 	"custom/mpris": {
 		"exec": "playerctl metadata title",
 		"format": "\uf144 {}",
+		"on-click": "playerctl play-pause",
 		"interval": 6,
 		"tooltip": false
 	},

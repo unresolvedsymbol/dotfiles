@@ -1,5 +1,7 @@
 #!/bin/bash
 
+[ -e /tmp/.docked ] && exit 1
+
 [ $(id -u) -eq 0 ] && (echo "Don't lock as root"; exit 1)
 
 [ -e ~/.cache/wal/colors.sh ] && . ~/.cache/wal/colors.sh

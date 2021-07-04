@@ -21,10 +21,6 @@ include ~/.cache/wal/colors-sway
 # Swaynag colors
 swaynag_command "swaynag -c ~/.cache/wal/colors-swaynag"
 
-# Oguri
-#swaybg_command -
-#exec oguri
-
 # Set wallpaper
 output * bg "$wallpaper" fill
 
@@ -93,7 +89,7 @@ bindsym $mod+y exec screenshot -r
 floating_modifier $mod normal
 
 # Reload configuration
-bindsym $mod+shift+r reload; exec source $HOME/.profile
+bindsym $mod+shift+r reload; exec source ~/.profile
 
 # TODO Figure out why these don't load on initial startup
 # Parse shortcuts
@@ -118,7 +114,7 @@ bindsym $mod+shift+$right move right
 
 #
 ## Workspaces
-#-r 
+# 
 
 bindsym $mod+1 workspace 1
 bindsym $mod+2 workspace 2
@@ -203,7 +199,6 @@ bindsym --locked XF86AudioLowerVolume exec amixer set Master 5%- && pkill -x -RT
 bindsym --locked XF86AudioRaiseVolume exec amixer set Master 5%+ && pkill -x -RTMIN+11 waybar
 bindsym --locked XF86AudioLowerVolume+shift exec amixer set Master 1%- && pkill -x -RTMIN+11 waybar
 bindsym --locked XF86AudioRaiseVolume+shift exec amixer set Master 1%+ && pkill -x -RTMIN+11 waybar
-#bindsym --locked XF86AudioMuteMic exec volumectl mutemic
 
 # Brightness
 bindsym --locked XF86MonBrightnessDown+shift exec brightnessctl set -- -1%
@@ -211,19 +206,8 @@ bindsym --locked XF86MonBrightnessUp+shift exec brightnessctl set +1%
 bindsym --locked XF86MonBrightnessDown exec brightnessctl set -- -5%
 bindsym --locked XF86MonBrightnessUp exec brightnessctl set +5%
 
-# ADB
-#bindsym --locked XF86LaunchA exec adb shell input keyevent 25
-#bindsym --locked XF86Explorer exec adb shell input keyevent 24
-
 # Lock
 bindsym ctrl+alt+delete exec lock
-
-# Title bar font
-font monospace 10
-
-# Window borders
-default_border pixel 3
-default_floating_border normal
 
 # Disable dragging
 tiling_drag disable
@@ -233,7 +217,7 @@ tiling_drag disable
 #
 
 # Lock and suspend on lid close
-bindswitch --locked lid:on exec sh -c "LOCK=1 lock; doas zzz"
+bindswitch --locked lid:on exec sh -c "LOCK=1 lock && doas zzz"
 
 #
 ## Modes
@@ -276,13 +260,31 @@ mode "Move" {
 
 bindsym $mod+m mode "Move"
 
+#
+## Replace internal bar with polybar-like replacement
+#
+
 bar {
 	swaybar_command waybar
 }
 
-# Workspace tabbing
+#
+## Workspace tabbing
+#
+
 bindsym $mod+tab workspace next_on_output
 bindsym $mod+tab+shift workspace prev_on_output
+
+#
+## Visuals
+#
+
+# Title bar font
+font monospace 10
+
+# Window borders
+default_border pixel 3
+default_floating_border normal
 
 # Gaps
 gaps inner 2
@@ -291,7 +293,6 @@ gaps inner 2
 for_window [app_id="firefox"] opacity 0.95 # Browser
 for_window [app_id="mako"] opacity 0.5 # Notifications
 for_window [class="URxvt"] opacity 0.95
-# $TERMCMD -a tty-clock tty-clock -tBC1
 for_window [app_id="tty-clock"] floating enable, resize set 260 130, move absolute position 3580 945
 for_window [app_id="floating"] floating enable
 for_window [app_id="visualizer"] opacity 1, border none 
@@ -299,8 +300,10 @@ for_window [app_id="visualizer"] opacity 1, border none
 # Hide wl-clipboard fake window
 for_window [title="wl-clipboard"] floating enable
 
-# Make icecat picture in picture useful
+# Make Firefox PiPs useful
 for_window [title="Picture-in-Picture"] floating enable, sticky enable
 
-# Include other configs
+#
+## Include personal configurations mostly related to inputs
+#
 include ~/.local/etc/sway/config.d/*
