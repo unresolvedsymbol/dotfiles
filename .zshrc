@@ -5,16 +5,17 @@
 
 HISTFILE="$HOME/.zsh_history"
 
-HISTSIZE=15000
-SAVEHIST=10000
+HISTSIZE=100000000
+SAVEHIST=100000000
 
-setopt extended_history		  # record timestamp of command in HISTFILE
-setopt hist_expire_dups_first # delete duplicates first when HISTFILE size exceeds HISTSIZE
-setopt hist_ignore_dups		  # ignore duplicated commands history list
-setopt hist_ignore_space	  # ignore commands that start with space
-setopt hist_verify			  # show command with history expansion to user before running it
-setopt inc_append_history	  # add commands to HISTFILE in order of execution
-setopt share_history		  # share command history data
+setopt extended_history		# record timestamp of command in HISTFILE
+setopt hist_expire_dups_first	# delete duplicates first when HISTFILE size exceeds HISTSIZE
+setopt hist_ignore_dups		# ignore duplicated commands history list
+setopt hist_ignore_space	# ignore commands that start with space
+setopt hist_verify		# show command with history expansion to user before running it
+setopt inc_append_history	# add commands to HISTFILE in order of execution
+setopt share_history		# share command history data
+setopt hist_ignore_all_dups	# ignore duplicates with diff time too
 
 # Enable autocompletion
 FPATH=$PREFIX/share/zsh/site-functions:$FPATH
@@ -23,6 +24,8 @@ zstyle ':completion:*' menu select
 zmodload zsh/complist
 compinit
 _comp_options+=(globdots)
+autoload -Uz bashcompinit
+bashcompinit
 
 #
 ## Terminal conditionals (styling, etc)
@@ -85,3 +88,6 @@ zle -N zle-line-init
 zle -N zle-keymap-select
 
 source ~/.aliasrc
+
+# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh

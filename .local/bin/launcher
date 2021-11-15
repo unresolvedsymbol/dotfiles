@@ -1,4 +1,6 @@
 #!/usr/bin/env zsh
+autoload -Uz bashcompinit
+bashcompinit
 : << 'EOF'
 case "$(basename $0)" in
 	bash) commands=$(compgen -c);;
@@ -9,4 +11,5 @@ esac
 # TODO: User shell specific magic? zsh ${(k)commands}
 swaymsg -- "exec $(echo ${commands} | sort -u | fzf)"
 EOF
-swaymsg -- "exec $(echo ${(k)commands} | tr ' ' '\n' | sort -u | fzf)"
+#swaymsg -- "exec $(echo ${(k)commands} | tr ' ' '\n' | sort -u | fzf)"
+swaymsg -- "exec $(echo $(compgen -c) | tr ' ' '\n' | sort -u | fzf)"

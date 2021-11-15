@@ -47,6 +47,10 @@ exec redshift
 # Terminal server
 exec_always foot --server
 
+# PipeWire
+exec_always pipewire
+exec_always pipewire-pulse
+
 #
 ## Colors
 #
@@ -71,7 +75,7 @@ client.unfocused	$color3		$background 	$foreground	$color6		$color3
 bindsym $mod+semicolon exec $term
 
 # Kill focused window
-bindsym $mod+q kill
+bindsym $mod+shift+q kill
 
 # Program launchers
 for_window [title="Launcher"] sticky enable, resize set 484 318, floating enable
@@ -80,10 +84,15 @@ bindsym $mod+shift+d exec launch Launcher desktoplauncher
 bindsym $mod+shift+e exec launch Launcher emojipicker
 #bindsym $mod+shift+m exec launch Launcher mpvplay
 
+# Alt is closer to my left thumb
+#[class="Ripcord"] bindsym $mod+k exec ydotool key Ctrl+K
+
+
 # Screenshot/screenrecord
 bindsym $mod+u exec screenshot -a
 bindsym $mod+shift+u exec screenshot -c -w
 bindsym $mod+y exec screenshot -r
+bindsym $mod+shift+y exec screenshot -d
 
 # Enable floating window dragging
 floating_modifier $mod normal
@@ -94,9 +103,11 @@ bindsym $mod+shift+r reload; exec source ~/.profile
 # TODO Figure out why these don't load on initial startup
 # Parse shortcuts
 exec_always sleep 2 && awk -F, '{sub("term","$term",$$3);system("swaymsg bindsym $mod+"$$1" exec \-\- "$$3)}' ~/.config/shortcuts
+# we out here
+exec swaymsg reload
 
 # Exit sway (logs you out of your Wayland session)
-bindsym $mod+shift+q exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -b 'Yes, exit sway' 'swaymsg exit'
+#bindsym $mod+shift+q exec swaynag -t warning -m 'You pressed the exit shortcut. Do you really want to exit sway? This will end your Wayland session.' -b 'Yes, exit sway' 'swaymsg exit'
 
 #
 ## Focus
@@ -194,11 +205,16 @@ exec_always amixer set Headphone 100%
 exec_always amixer set Headphone on
 
 # Volume
-bindsym --locked XF86AudioMute exec amixer set Master toggle && pkill -x -RTMIN+11 waybar
-bindsym --locked XF86AudioLowerVolume exec amixer set Master 5%- && pkill -x -RTMIN+11 waybar
-bindsym --locked XF86AudioRaiseVolume exec amixer set Master 5%+ && pkill -x -RTMIN+11 waybar
-bindsym --locked XF86AudioLowerVolume+shift exec amixer set Master 1%- && pkill -x -RTMIN+11 waybar
-bindsym --locked XF86AudioRaiseVolume+shift exec amixer set Master 1%+ && pkill -x -RTMIN+11 waybar
+#bindsym --locked XF86AudioMute exec amixer set Master toggle && pkill -x -RTMIN+11 waybar
+#bindsym --locked XF86AudioLowerVolume exec amixer set Master 5%- && pkill -x -RTMIN+11 waybar
+#bindsym --locked XF86AudioRaiseVolume exec amixer set Master 5%+ && pkill -x -RTMIN+11 waybar
+#bindsym --locked XF86AudioLowerVolume+shift exec amixer set Master 1%- && pkill -x -RTMIN+11 waybar
+#bindsym --locked XF86AudioRaiseVolume+shift exec amixer set Master 1%+ && pkill -x -RTMIN+11 waybar
+bindsym --locked XF86AudioMute exec pamixer -t
+bindsym --locked XF86AudioLowerVolume exec pamixer -d 5
+bindsym --locked XF86AudioRaiseVolume exec pamixer -i 5
+bindsym --locked XF86AudioLowerVolume+shift exec pamixer -d 1
+bindsym --locked XF86AudioRaiseVolume+shift exec pamixer -i 1
 
 # Brightness
 bindsym --locked XF86MonBrightnessDown+shift exec brightnessctl set -- -1%
@@ -299,6 +315,8 @@ for_window [app_id="visualizer"] opacity 1, border none
 
 # Hide wl-clipboard fake window
 for_window [title="wl-clipboard"] floating enable
+
+#for_window [app_id="" title="" pid=24149] floating enable
 
 # Make Firefox PiPs useful
 for_window [title="Picture-in-Picture"] floating enable, sticky enable

@@ -28,7 +28,7 @@ export INFODIR="$PREFIX/share/info:/usr/share/info:/usr/local/share/info"
 
 export EDITOR="vim"
 export TERMCMD="footclient"
-export BROWSER="firefox"
+export BROWSER="chrome"
 export PAGER="less"
 
 # Theming

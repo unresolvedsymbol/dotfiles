@@ -62,7 +62,6 @@ alias hack="hexdump -C /dev/urandom | grep 'be ef'"
 alias rot13="tr 'A-Za-z' 'N-ZA-Mn-za-m'"
 alias v="$EDITOR"
 alias vv="doas env HOME=$HOME LANG=$LANG $EDITOR" # Preserve enviornment for editor configuration
-alias netstat="lsof -i" # Sort of
 
 alias lsbig="du -chsx *(D) 2>/dev/null | sort -rh"
 alias dupes="find . ! -empty -type f -exec md5sum {} + | sort | uniq -w32 -d" # Find duplicates
@@ -92,7 +91,7 @@ alias ...="cd ../.."
 alias ....="cd ../../.."
 alias .....="cd ../../../.."
 
-alias gcl="git clone"
+alias gcl="git clone --depth 1 --recursive"
 alias gcm="git commit"
 alias gpl="git pull"
 alias gpu="git push"

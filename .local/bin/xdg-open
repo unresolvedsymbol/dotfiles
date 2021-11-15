@@ -1,6 +1,6 @@
 #!/bin/sh
 # handle files with rifle otherwise use xdg (other uris etc)
-echo -n "$@" | grep -E -q "http[s]?:\/\/" &&
+echo "$@" | grep -E -q "http[s]?:\/\/" &&
 	exec $BROWSER --new-tab $@  # new-tab works on chromium and firefox based browsers so whatever
 
 #[ -e "$@" ] && (

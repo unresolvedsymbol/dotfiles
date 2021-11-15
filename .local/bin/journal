@@ -6,4 +6,4 @@ cd $path
 file="$(date +%d)"
 [ -a $file ] || echo -e "\n-+-> Daily journal started $(date +%c)\n" > $file
 echo -e "\n-+-> Entry at $(date +%r)\n" >> $file
-$EDITOR $file
+vim $file

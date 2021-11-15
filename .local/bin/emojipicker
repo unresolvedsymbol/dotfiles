@@ -2,5 +2,5 @@
 emote=$(cat ~/.emoji | fzf | cut -d' ' -f1)
 [ "$emote" ] && {
 	echo -n "$emote" | wl-copy
-	echo -n "$emote" | xclip -i -selection clipboard
+	#echo -n "$emote" | xclip -i -selection clipboard
 }
